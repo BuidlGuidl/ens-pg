@@ -6,6 +6,7 @@ import deployedContracts from "~~/contracts/deployedContracts";
 import scaffoldConfig from "~~/scaffold.config";
 import { getGrantById } from "~~/services/database/repositories/grants";
 import { StageInsert, createStage, updateStageStatusToCompleted } from "~~/services/database/repositories/stages";
+import { notifyTelegramBot } from "~~/services/notifications/telegram";
 import { authOptions } from "~~/utils/auth";
 import { EIP_712_DOMAIN, EIP_712_TYPES__APPLY_FOR_STAGE } from "~~/utils/eip712";
 import { getAlchemyHttpUrl } from "~~/utils/scaffold-eth";
@@ -91,6 +92,11 @@ export async function POST(req: Request) {
       grantId: newStage.grantId,
       milestone: newStage.milestone,
       stageNumber: latestStage.stageNumber + 1,
+    });
+
+    await notifyTelegramBot("stage", {
+      newStage: body,
+      grant: grant,
     });
 
     return NextResponse.json({ grantId: newStage.grantId, stageId: createdStage.id }, { status: 201 });

@@ -4,6 +4,7 @@ import { parseEther } from "viem";
 import { applyFormSchema } from "~~/app/apply/schema";
 import { GrantInsert, createGrant } from "~~/services/database/repositories/grants";
 import { createStage } from "~~/services/database/repositories/stages";
+import { notifyTelegramBot } from "~~/services/notifications/telegram";
 import { authOptions } from "~~/utils/auth";
 
 export type CreateNewGrantReqBody = Omit<GrantInsert, "requestedFunds" | "builderAddress"> & {
@@ -34,6 +35,12 @@ export async function POST(req: Request) {
 
     const [createdStage] = await createStage({
       grantId: createdGrant.id,
+    });
+
+    await notifyTelegramBot("grant", {
+      id: createdGrant.id,
+      ...body,
+      builderAddress,
     });
 
     return NextResponse.json({ grantId: createdGrant.id, stageId: createdStage.id }, { status: 201 });
