@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { NewStageModalFormValues, newStageModalFormSchema } from "./schema";
 import { useMutation } from "@tanstack/react-query";
@@ -27,6 +27,7 @@ export const NewStageModal = forwardRef<HTMLDialogElement, NewStageModalProps>(
       schema: newStageModalFormSchema,
     });
     const { handleSubmit } = formMethods;
+    const feedbackModalRef = useRef<HTMLDialogElement>(null);
 
     const onSubmit = async (fieldValues: NewStageModalFormValues) => {
       try {
@@ -44,12 +45,13 @@ export const NewStageModal = forwardRef<HTMLDialogElement, NewStageModalProps>(
 
         await postNewStage({ milestone, signature, grantId });
         closeModal();
-        router.refresh();
+        feedbackModalRef.current?.showModal();
       } catch (error) {
         const errorMessage = getParsedError(error);
         notification.error(errorMessage);
       }
     };
+
     const { signTypedDataAsync, isPending: isSigning } = useSignTypedData();
     const router = useRouter();
 
@@ -58,33 +60,63 @@ export const NewStageModal = forwardRef<HTMLDialogElement, NewStageModalProps>(
         postMutationFetcher("/api/stages/new", { body: newStageBody }),
     });
 
+    const handleFeedbackModalClose = () => {
+      feedbackModalRef.current?.close();
+      router.refresh();
+    };
+
     return (
-      <dialog id="action_modal" className="modal" ref={ref}>
-        <div className="modal-box flex flex-col space-y-3">
-          <form method="dialog" className="bg-secondary -mx-6 -mt-6 px-6 py-4 flex items-center justify-between">
-            <div className="flex justify-between items-center">
-              <p className="font-bold text-xl m-0">Stage {previousStage.stageNumber + 1} application</p>
-            </div>
-            {/* if there is a button in form, it will close the modal */}
-            <button className="btn btn-sm btn-circle btn-ghost text-xl h-auto">✕</button>
-          </form>
-          <FormProvider {...formMethods}>
-            <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col">
-              <FormTextarea label="Stage milestones" showMessageLength {...getCommonOptions("milestone")} />
-              <Button
-                variant="green"
-                type="submit"
-                disabled={isPostingNewStage || isSigning}
-                className="self-center mt-4"
-              >
-                {(isPostingNewStage || isSigning) && <span className="loading loading-spinner"></span>}
-                Apply for a grant
-              </Button>
+      <>
+        <dialog id="action_modal" className="modal" ref={ref}>
+          <div className="modal-box flex flex-col space-y-3">
+            <form method="dialog" className="bg-secondary -mx-6 -mt-6 px-6 py-4 flex items-center justify-between">
+              <div className="flex justify-between items-center">
+                <p className="font-bold text-xl m-0">Stage {previousStage.stageNumber + 1} application</p>
+              </div>
+              {/* if there is a button in form, it will close the modal */}
+              <button className="btn btn-sm btn-circle btn-ghost text-xl h-auto">✕</button>
             </form>
-          </FormProvider>
-        </div>
+            <FormProvider {...formMethods}>
+              <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col">
+                <FormTextarea label="Stage milestones" showMessageLength {...getCommonOptions("milestone")} />
+                <Button
+                  variant="green"
+                  type="submit"
+                  disabled={isPostingNewStage || isSigning}
+                  className="self-center mt-4"
+                >
+                  {(isPostingNewStage || isSigning) && <span className="loading loading-spinner"></span>}
+                  Apply for a grant
+                </Button>
+              </form>
+            </FormProvider>
+          </div>
+        </dialog>
+
+        <dialog ref={feedbackModalRef} className="modal">
+          <div className="modal-box flex flex-col space-y-3">
+            <form method="dialog" className="bg-secondary -mx-6 -mt-6 px-6 py-4">
+              <div className="flex items-center">
+                <p className="font-bold text-xl m-0 text-center w-full">Stage Application Submitted!</p>
+              </div>
+            </form>
+
+            <div className="text-center">
+              <p>
+                Your stage application will be reviewed. You will receive information if we need more details, if the
+                application was rejected and why, or when it is approved and for what amount.
+              </p>
+              <div className="mt-6 flex justify-center">
+                <Button onClick={handleFeedbackModalClose}>Accept</Button>
+              </div>
+            </div>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button onClick={handleFeedbackModalClose}>close</button>
+          </form>
+        </dialog>
         <Toaster />
-      </dialog>
+      </>
     );
   },
 );
