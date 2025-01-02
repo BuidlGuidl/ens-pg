@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CreateNewGrantReqBody } from "../api/grants/new/route";
@@ -29,6 +29,8 @@ const Apply: NextPage = () => {
   const { openConnectModal } = useConnectModal();
   const { isAuthenticated } = useAuthSession();
 
+  const feedbackModalRef = useRef<HTMLDialogElement>(null);
+
   useEffect(() => {
     if (isAuthenticated) {
       router.refresh();
@@ -47,11 +49,16 @@ const Apply: NextPage = () => {
         ...fieldValues,
       });
       notification.success(`The grant proposal has been created`);
-      router.push("/my-grants");
+      feedbackModalRef.current?.showModal();
     } catch (error) {
       const errorMessage = getParsedError(error);
       notification.error(errorMessage);
     }
+  };
+
+  const handleModalClose = () => {
+    feedbackModalRef.current?.close();
+    router.push("/my-grants");
   };
 
   return (
@@ -61,6 +68,29 @@ const Apply: NextPage = () => {
         Open to all public goods projects. ENS-specific projects should apply through the ENS Ecosystem Grants program
         instead.
       </p>
+
+      <dialog ref={feedbackModalRef} className="modal">
+        <div className="modal-box flex flex-col space-y-3">
+          <form method="dialog" className="bg-secondary -mx-6 -mt-6 px-6 py-4">
+            <div className="flex items-center">
+              <p className="font-bold text-xl m-0 text-center w-full">Application Submitted Successfully!</p>
+            </div>
+          </form>
+
+          <div className="text-center">
+            <p>
+              Grant applications are reviewed at a regular cadence, you will receive information if we need more info,
+              if the application was rejected and why, or approved and for what amount, based on the info submitted.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <Button onClick={handleModalClose}>Accept</Button>
+            </div>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={handleModalClose}>close</button>
+        </form>
+      </dialog>
 
       <FormProvider {...formMethods}>
         <div className="mt-6 sm:mt-10 card card-compact rounded-xl w-full max-w-4xl bg-secondary shadow-lg mb-8 sm:mb-12 p-4 sm:p-6">
