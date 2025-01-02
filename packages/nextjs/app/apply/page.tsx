@@ -57,6 +57,10 @@ const Apply: NextPage = () => {
   return (
     <div className="flex flex-col w-full items-center justify-center p-6 sm:p-10">
       <h2 className="text-2xl sm:text-3xl font-extrabold !mb-0">Apply for a grant</h2>
+      <p className="text-center text-lg text-base-content/80 mt-4 max-w-2xl">
+        Open to all public goods projects. ENS-specific projects should apply through the ENS Ecosystem Grants program
+        instead.
+      </p>
 
       <FormProvider {...formMethods}>
         <div className="mt-6 sm:mt-10 card card-compact rounded-xl w-full max-w-4xl bg-secondary shadow-lg mb-8 sm:mb-12 p-4 sm:p-6">
