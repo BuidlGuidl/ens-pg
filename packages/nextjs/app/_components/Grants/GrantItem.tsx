@@ -79,7 +79,7 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
         />
       </div>
       <div className="px-5 pb-5 flex flex-col justify-between flex-grow">
-        <div className="line-clamp-4">{multilineStringToTsx(grant.description)}</div>
+        <div className="text-gray-400 line-clamp-4">{multilineStringToTsx(grant.description)}</div>
         {allWithdrawals.length > 0 && (
           <Button
             className="mt-6"
