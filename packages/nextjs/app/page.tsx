@@ -34,17 +34,16 @@ const Home: NextPage = () => {
     <div className="flex items-center flex-col flex-grow">
       <div className="max-w-4xl text-center px-4 py-8 sm:py-16">
         <h1 className="text-3xl font-extrabold !mb-0">ENS PG Builder Grants</h1>
-        <div className="mt-4 text-gray-400 max-w-2xl mx-auto space-y-4">
+        <div className="mt-4 max-w-2xl mx-auto space-y-4">
           <p>
-            The ENS PG Builder Grants program is designed to support foundational public goods in the Ethereum and Web3
+            PG Builder Grants program is designed to support foundational public goods in the Ethereum and Web3
             ecosystems. The program aims to empower projects that have demonstrated exceptional usefulness and impact
             for developers and users alike.
           </p>
           <p>
             By providing significant financial support, we help projects continue to drive innovation and growth within
             the ecosystem. Whether you&apos;re building infrastructure, developing tools, or creating educational
-            resources, the ENS PG Builder Grants offer a pathway to secure the funding you need to make a lasting
-            difference.
+            resources, PG Builder Grants offer a pathway to secure the funding you need to make a lasting difference.
           </p>
         </div>
         <Stats />
