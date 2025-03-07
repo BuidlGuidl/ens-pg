@@ -217,6 +217,8 @@ async function seed() {
         amount: 10000000n,
         proposedDeliverables: "Deliverables 1",
         proposedCompletionDate: "2025-01-01",
+        completedAt: new Date(),
+        completionProof: "Proof 1",
       },
       {
         description: "Milestone 2 - Stage 1 - Large Grant 1",
@@ -226,6 +228,8 @@ async function seed() {
         amount: 20000000n,
         proposedDeliverables: "Deliverables 2",
         proposedCompletionDate: "2025-02-01",
+        completedAt: new Date(),
+        completionProof: "Proof 2",
       },
       {
         description: "Milestone 1 - Stage 2 - Large Grant 1",
@@ -244,6 +248,8 @@ async function seed() {
         amount: 10000000n,
         proposedDeliverables: "Deliverables 4",
         proposedCompletionDate: "2025-04-01",
+        completedAt: new Date(),
+        completionProof: "Proof 3",
       },
       {
         description: "Milestone 2 - Stage 1 - Large Grant 2",
@@ -253,6 +259,8 @@ async function seed() {
         amount: 10000000n,
         proposedDeliverables: "Deliverables 5",
         proposedCompletionDate: "2025-05-01",
+        completedAt: new Date(),
+        completionProof: "Proof 4",
       },
       {
         description: "Milestone 1 - Stage 2 - Large Grant 2",
@@ -271,6 +279,8 @@ async function seed() {
         amount: 20000000n,
         proposedDeliverables: "Deliverables 7",
         proposedCompletionDate: "2025-07-01",
+        completedAt: new Date(),
+        completionProof: "Proof 7",
       },
       {
         description: "Milestone 1 - Stage 2 - Large Grant 3",
@@ -280,6 +290,8 @@ async function seed() {
         amount: 30000000n,
         proposedDeliverables: "Deliverables 8",
         proposedCompletionDate: "2025-08-01",
+        completedAt: new Date(),
+        completionProof: "Proof 8",
       },
       {
         description: "Milestone 1 - Stage 3 - Large Grant 3",
