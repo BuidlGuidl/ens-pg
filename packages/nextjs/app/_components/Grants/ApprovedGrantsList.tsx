@@ -4,12 +4,12 @@ import { useState } from "react";
 import { GrantItem } from "./GrantItem";
 import { LargeGrantItem } from "./LargeGrantItem";
 import { Pagination } from "~~/components/pg-ens/Pagination";
-import { DiscriminatedGrant } from "~~/types/utils";
+import { DiscriminatedPublicGrant } from "~~/types/utils";
 
 const GRANTS_PER_PAGE = 8;
 
 type ApprovedGrantsListProps = {
-  approvedGrants: DiscriminatedGrant[];
+  approvedGrants: DiscriminatedPublicGrant[];
 };
 
 export const ApprovedGrantsList = ({ approvedGrants }: ApprovedGrantsListProps) => {

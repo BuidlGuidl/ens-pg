@@ -6,4 +6,4 @@ export type Tuple<T, MaxLength extends number = 10, Current extends T[] = []> = 
   : Current | Tuple<T, MaxLength, [T, ...Current]>;
 
 // Add a discriminator property to distinguish between PublicGrant and PublicLargeGrant
-export type DiscriminatedGrant = (PublicGrant & { type: "grant" }) | (PublicLargeGrant & { type: "largeGrant" });
+export type DiscriminatedPublicGrant = (PublicGrant & { type: "grant" }) | (PublicLargeGrant & { type: "largeGrant" });

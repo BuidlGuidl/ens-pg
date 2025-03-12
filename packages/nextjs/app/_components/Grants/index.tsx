@@ -1,22 +1,22 @@
 import { ApprovedGrantsList } from "./ApprovedGrantsList";
 import { getPublicGrants } from "~~/services/database/repositories/grants";
 import { getPublicLargeGrants } from "~~/services/database/repositories/large-grants";
-import { DiscriminatedGrant } from "~~/types/utils";
+import { DiscriminatedPublicGrant } from "~~/types/utils";
 
 export const ApprovedGrants = async () => {
   const allGrants = await getPublicGrants();
-  const approvedGrants: DiscriminatedGrant[] = allGrants
+  const approvedGrants: DiscriminatedPublicGrant[] = allGrants
     .filter(grant => grant.stages.some(stage => stage.status === "approved" || stage.status === "completed"))
     .map(grant => ({ ...grant, type: "grant" }));
 
   const allLargeGrants = await getPublicLargeGrants();
-  const approvedLargeGrants: DiscriminatedGrant[] = allLargeGrants
+  const approvedLargeGrants: DiscriminatedPublicGrant[] = allLargeGrants
     .filter(grant => grant.stages.some(stage => stage.status === "approved" || stage.status === "completed"))
     .map(grant => ({ ...grant, type: "largeGrant" }));
 
   if (approvedGrants.length === 0 && approvedLargeGrants.length === 0) return null;
 
-  const approvedAllGrants: DiscriminatedGrant[] = [...approvedGrants, ...approvedLargeGrants].sort(
+  const approvedAllGrants: DiscriminatedPublicGrant[] = [...approvedGrants, ...approvedLargeGrants].sort(
     (a, b) => (b.submitedAt?.getTime() ?? 0) - (a.submitedAt?.getTime() ?? 0),
   );
 
