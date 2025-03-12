@@ -7,14 +7,17 @@ export type LargeStageUpdate = Partial<LargeStageInsert>;
 export type LargeStage = InferSelectModel<typeof largeStages>;
 export type Status = (typeof stagesStatusEnum.enumValues)[number];
 
+// Note: not used yet
 export async function createStage(stage: LargeStageInsert) {
   return await db.insert(largeStages).values(stage).returning({ id: largeStages.id });
 }
 
+// Note: not used yet
 export async function updateStage(stageId: Required<LargeStageUpdate>["id"], stage: LargeStageUpdate) {
   return await db.update(largeStages).set(stage).where(eq(largeStages.id, stageId));
 }
 
+// Note: not used yet
 export async function getStageByIdWithGrantAndVotes(stageId: number) {
   return await db.query.largeStages.findFirst({
     where: eq(largeStages.id, stageId),
@@ -25,10 +28,12 @@ export async function getStageByIdWithGrantAndVotes(stageId: number) {
   });
 }
 
+// Note: not used yet
 export async function updateStageStatusToCompleted(stageId: number) {
   return await db.update(largeStages).set({ status: "completed" }).where(eq(largeStages.id, stageId));
 }
 
+// Note: not used yet
 export async function findStageByGrantNumberStageNumberAndBuilderAddress(
   grantNumber: number,
   stageNumber: number,

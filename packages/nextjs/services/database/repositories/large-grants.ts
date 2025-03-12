@@ -6,6 +6,7 @@ export type GrantInsert = InferInsertModel<typeof largeGrants>;
 export type Grant = InferSelectModel<typeof largeGrants>;
 export type PublicLargeGrant = Awaited<ReturnType<typeof getPublicLargeGrants>>[number];
 
+// Note: not used yet
 export async function getAllLargeGrants() {
   return await db.query.largeGrants.findMany({
     orderBy: [desc(largeGrants.submitedAt)],
@@ -58,6 +59,7 @@ export async function getPublicLargeGrants() {
   });
 }
 
+// Note: not used yet
 // Note: use only for admin pages
 export async function getAllLargeGrantsWithStagesAndPrivateNotes() {
   return await db.query.largeGrants.findMany({
@@ -75,6 +77,7 @@ export async function getAllLargeGrantsWithStagesAndPrivateNotes() {
   });
 }
 
+// Note: not used yet
 export async function getBuilderLargeGrants(builderAddress: string) {
   return await db.query.largeGrants.findMany({
     where: eq(largeGrants.builderAddress, builderAddress),
@@ -86,6 +89,7 @@ export async function getBuilderLargeGrants(builderAddress: string) {
   });
 }
 
+// Note: not used yet
 export async function createLargeGrant(grant: GrantInsert) {
   const maxGrantNumber = await db
     .select({ maxNumber: max(largeGrants.grantNumber) })
@@ -101,6 +105,7 @@ export async function createLargeGrant(grant: GrantInsert) {
     .returning({ id: largeGrants.id, grantNumber: largeGrants.grantNumber });
 }
 
+// Note: not used yet
 export async function getLargeGrantById(grantId: number) {
   return await db.query.largeGrants.findFirst({
     where: eq(largeGrants.id, grantId),
