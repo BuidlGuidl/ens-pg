@@ -36,20 +36,17 @@ export const LargeGrantItem = ({ grant, latestsShownStatus }: GrantItemProps) =>
     (latestStage.status === "proposed" || latestStage.status === "rejected");
 
   const allMilestonesGrantAmount = grant.stages
-    .map(stage =>
-      stage.milestones
-        .map(milestone => milestone.amount || 0n)
-        .reduce((acc, current) => BigInt(acc || 0n) + BigInt(current || 0n), 0n),
-    )
-    .reduce((acc, current) => BigInt(acc || 0n) + BigInt(current || 0n), 0n);
+    .flatMap(stage => stage.milestones)
+    .reduce((acc, current) => BigInt(acc || 0n) + BigInt(current.amount || 0n), 0n);
 
-  const completedMilestones = grant.stages
-    .map(stage => stage.milestones.filter(milestone => milestone.status === "completed"))
-    .flat();
+  const completedMilestones = grant.stages.flatMap(stage =>
+    stage.milestones.filter(milestone => milestone.status === "completed"),
+  );
 
-  const completedMilestonesAmount = completedMilestones
-    .map(milestone => milestone.amount || 0n)
-    .reduce((acc, current) => BigInt(acc || 0n) + BigInt(current || 0n), 0n);
+  const completedMilestonesAmount = completedMilestones.reduce(
+    (acc, current) => BigInt(acc || 0n) + BigInt(current.amount || 0n),
+    0n,
+  );
 
   return (
     <div className="card flex flex-col bg-white text-primary-content w-full max-w-96 shadow-lg rounded-lg overflow-hidden">
