@@ -1,11 +1,7 @@
 import { ApprovedGrantsList } from "./ApprovedGrantsList";
 import { getPublicGrants } from "~~/services/database/repositories/grants";
-import { PublicGrant } from "~~/services/database/repositories/grants";
 import { getPublicLargeGrants } from "~~/services/database/repositories/large-grants";
-import { PublicLargeGrant } from "~~/services/database/repositories/large-grants";
-
-// Add a discriminator property to distinguish between PublicGrant and PublicLargeGrant
-type DiscriminatedGrant = (PublicGrant & { type: "grant" }) | (PublicLargeGrant & { type: "largeGrant" });
+import { DiscriminatedGrant } from "~~/types/utils";
 
 export const ApprovedGrants = async () => {
   const allGrants = await getPublicGrants();

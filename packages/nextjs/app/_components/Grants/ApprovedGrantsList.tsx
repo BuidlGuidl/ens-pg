@@ -4,13 +4,10 @@ import { useState } from "react";
 import { GrantItem } from "./GrantItem";
 import { LargeGrantItem } from "./LargeGrantItem";
 import { Pagination } from "~~/components/pg-ens/Pagination";
-import { PublicGrant } from "~~/services/database/repositories/grants";
-import { PublicLargeGrant } from "~~/services/database/repositories/large-grants";
+import { DiscriminatedGrant } from "~~/types/utils";
 
 const GRANTS_PER_PAGE = 8;
 
-// Add a discriminator property to distinguish between PublicGrant and PublicLargeGrant
-type DiscriminatedGrant = (PublicGrant & { type: "grant" }) | (PublicLargeGrant & { type: "largeGrant" });
 type ApprovedGrantsListProps = {
   approvedGrants: DiscriminatedGrant[];
 };
