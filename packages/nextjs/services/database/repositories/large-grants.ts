@@ -2,8 +2,8 @@ import { InferInsertModel, InferSelectModel, desc, eq, max } from "drizzle-orm";
 import { db } from "~~/services/database/config/postgresClient";
 import { largeGrants, largeMilestones, largeStages } from "~~/services/database/config/schema";
 
-export type GrantInsert = InferInsertModel<typeof largeGrants>;
-export type Grant = InferSelectModel<typeof largeGrants>;
+export type LargeGrantInsert = InferInsertModel<typeof largeGrants>;
+export type LargeGrant = InferSelectModel<typeof largeGrants>;
 export type PublicLargeGrant = Awaited<ReturnType<typeof getPublicLargeGrants>>[number];
 
 // Note: not used yet
@@ -90,7 +90,7 @@ export async function getBuilderLargeGrants(builderAddress: string) {
 }
 
 // Note: not used yet
-export async function createLargeGrant(grant: GrantInsert) {
+export async function createLargeGrant(grant: LargeGrantInsert) {
   const maxGrantNumber = await db
     .select({ maxNumber: max(largeGrants.grantNumber) })
     .from(largeGrants)
