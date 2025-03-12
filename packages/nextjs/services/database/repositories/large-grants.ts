@@ -45,7 +45,7 @@ export async function getPublicLargeGrants() {
             columns: {
               id: true,
               milestoneNumber: true,
-              name: true,
+              description: true,
               amount: true,
               status: true,
               completedAt: true,
