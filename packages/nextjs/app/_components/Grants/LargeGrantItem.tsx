@@ -5,7 +5,7 @@ import { formatUnits } from "viem";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Badge } from "~~/components/pg-ens/Badge";
 import { Button } from "~~/components/pg-ens/Button";
-import { LargeGrantProgressBar } from "~~/components/pg-ens/LargeGrantProgressBar";
+import { GrantProgressBar } from "~~/components/pg-ens/GrantProgressBar";
 import { Address } from "~~/components/scaffold-eth";
 import { useAuthSession } from "~~/hooks/pg-ens/useAuthSession";
 import { PublicLargeGrant } from "~~/services/database/repositories/large-grants";
@@ -71,8 +71,9 @@ export const LargeGrantItem = ({ grant, latestsShownStatus }: GrantItemProps) =>
         <Address address={grant.builderAddress as `0x{string}`} />
       </div>
       <div className="px-5 py-4 w-full">
-        <LargeGrantProgressBar
+        <GrantProgressBar
           className="w-full"
+          isLargeGrant={true}
           amount={Number(formatUnits(allMilestonesGrantAmount, 6))}
           withdrawn={Number(formatUnits(completedMilestonesAmount || 0n, 6))}
         />
