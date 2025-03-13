@@ -3,9 +3,16 @@ export type GrantProgressBarProps = {
   amount: number;
   withdrawn?: number;
   available?: number;
+  isLargeGrant?: boolean;
 };
 
-export const GrantProgressBar = ({ amount, withdrawn = 0, available = 0, className = "" }: GrantProgressBarProps) => {
+export const GrantProgressBar = ({
+  amount,
+  withdrawn = 0,
+  available = 0,
+  className = "",
+  isLargeGrant = false,
+}: GrantProgressBarProps) => {
   const availablePercentage = (available / amount) * 100;
   const withdrawnPercentage = (withdrawn / amount) * 100;
 
@@ -15,7 +22,7 @@ export const GrantProgressBar = ({ amount, withdrawn = 0, available = 0, classNa
 
   return (
     <div className={className}>
-      <div className="text-end">{available ? `${available} ETH available to withdraw` : ""}</div>
+      {!isLargeGrant && <div className="text-end">{available ? `${available} ETH available to withdraw` : ""}</div>}
       <div className="bg-gray-300 h-4 rounded relative mt-2">
         <div
           className="bg-primary rounded absolute z-[2] inset-y-0 left-0"
@@ -27,8 +34,12 @@ export const GrantProgressBar = ({ amount, withdrawn = 0, available = 0, classNa
         />
       </div>
       <div className="flex justify-between font-semibold mt-2">
-        <span>{withdrawn} ETH withdrawn</span>
-        <span>{amount} ETH</span>
+        <span>
+          {withdrawn} {isLargeGrant ? "USDC received" : "ETH withdrawn"}
+        </span>
+        <span>
+          {amount} {isLargeGrant ? "USDC" : "ETH"}
+        </span>
       </div>
     </div>
   );
