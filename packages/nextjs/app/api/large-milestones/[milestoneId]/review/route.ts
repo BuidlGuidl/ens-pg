@@ -89,8 +89,15 @@ export async function POST(req: NextRequest, { params }: { params: { milestoneId
           }
         : {};
 
+    let status = body.status;
+
+    if (status === "completed" && milestone.verifiedAt) {
+      // if the milestone is completed, set the status to "verified" if it was verified before
+      status = "verified";
+    }
+
     await updateMilestone(Number(milestoneId), {
-      status: body.status,
+      status,
       statusNote: session?.user.role === "admin" ? body.statusNote : undefined,
       completionProof: body.completionProof,
       ...verifiedObj,
