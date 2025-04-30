@@ -28,44 +28,46 @@ export async function POST(req: NextRequest, { params }: { params: { milestoneId
 
     if (!milestone) return NextResponse.json({ error: "Milestone not found" }, { status: 404 });
 
+    let status = body.status;
+
     const recoveredAddress = await recoverTypedDataAddress({
       domain: EIP_712_DOMAIN,
       types: EIP_712_TYPES__REVIEW_LARGE_MILESTONE,
       primaryType: "Message",
       message: {
         milestoneId,
-        action: body.status,
+        action: status,
         txHash: body.verifiedTx || body.paymentTx || "",
         statusNote: body.statusNote || "",
       },
       signature: body.signature,
     });
 
-    if (body.status === "completed" && session?.user.address !== milestone.stage.grant.builderAddress) {
+    if (status === "completed" && session?.user.address !== milestone.stage.grant.builderAddress) {
       return NextResponse.json({ error: "Only grant owner can complete milestones" }, { status: 401 });
     }
 
-    if (body.status !== "completed" && session?.user.role !== "admin") {
+    if (status !== "completed" && session?.user.role !== "admin") {
       return NextResponse.json({ error: "Only admins can review milestones" }, { status: 401 });
     }
 
     if (session?.user.address !== recoveredAddress)
       return NextResponse.json({ error: "Recovered address did not match session address" }, { status: 403 });
 
-    if (body.status === "verified" && !body.verifiedTx) {
+    if (status === "verified" && !body.verifiedTx) {
       return NextResponse.json({ error: "Verified milestones must have a transaction hash" }, { status: 400 });
     }
 
-    if (body.status === "paid" && !body.paymentTx) {
+    if (status === "paid" && !body.paymentTx) {
       return NextResponse.json({ error: "Paid milestones must have a transaction hash" }, { status: 400 });
     }
 
-    if (body.status === "paid" && milestone.status !== "verified") {
+    if (status === "paid" && milestone.status !== "verified") {
       return NextResponse.json({ error: "Milestone not verified yet" }, { status: 400 });
     }
 
     const verifiedObj =
-      body.status === "verified"
+      status === "verified"
         ? {
             verifiedTx: body.verifiedTx,
             verifiedAt: new Date(),
@@ -74,7 +76,7 @@ export async function POST(req: NextRequest, { params }: { params: { milestoneId
         : {};
 
     const paymentObj =
-      body.status === "paid"
+      status === "paid"
         ? {
             paymentTx: body.paymentTx,
             paidAt: new Date(),
@@ -83,13 +85,11 @@ export async function POST(req: NextRequest, { params }: { params: { milestoneId
         : {};
 
     const completedObj =
-      body.status === "completed"
+      status === "completed"
         ? {
             completedAt: new Date(),
           }
         : {};
-
-    let status = body.status;
 
     if (status === "completed" && milestone.verifiedAt) {
       // if the milestone is completed, set the status to "verified" if it was verified before
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest, { params }: { params: { milestoneId
     });
 
     // check if this is the last milestone of the stage and update the stage status to "completed"
-    if (body.status === "paid") {
+    if (status === "paid") {
       const stage = milestone.stage;
       const stageWithMilestones = await getStageWithMilestones(stage.id);
       const allMilestonesPaid = stageWithMilestones
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest, { params }: { params: { milestoneId
       }
     }
 
-    return NextResponse.json({ milestoneId, status: body.status }, { status: 200 });
+    return NextResponse.json({ milestoneId, status }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ error: "Error processing form" }, { status: 500 });
   }
