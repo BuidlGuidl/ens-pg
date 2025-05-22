@@ -74,7 +74,7 @@ export const MilestonePrivateNoteModal = forwardRef<HTMLDialogElement, Milestone
           <FormProvider {...formMethods}>
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col space-y-1">
               <FormTextarea label="Private note (not visible by grantee)" {...getCommonOptions("note")} />
-              <Button type="submit" disabled={isPostingPrivateNote || isSigning} className="self-center">
+              <Button type="submit" disabled={isPostingPrivateNote || isSigning} size="sm" className="self-center">
                 {(isPostingPrivateNote || isSigning) && <span className="loading loading-spinner"></span>}
                 Save
               </Button>

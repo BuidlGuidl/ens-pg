@@ -146,7 +146,13 @@ export const LargeGrantFinalApproveModal = forwardRef<
                 {loadingStatusText}
               </div>
             )}
-            <Button variant="green" type="submit" className="!px-4 self-center" disabled={Boolean(loadingStatus)}>
+            <Button
+              variant="green"
+              type="submit"
+              size="sm"
+              className="!px-4 self-center"
+              disabled={Boolean(loadingStatus)}
+            >
               <span>Final Approve</span>
             </Button>
           </form>

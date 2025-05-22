@@ -44,6 +44,7 @@ export const LargeMilestoneRejectModal = forwardRef<HTMLDialogElement, RejectMod
             <FormTextarea label="Note (visible to grantee)" {...getCommonOptions("statusNote")} />
             <Button
               variant="red"
+              size="sm"
               type="submit"
               disabled={isPostingMilestoneReview || isSigning}
               className="self-center"
