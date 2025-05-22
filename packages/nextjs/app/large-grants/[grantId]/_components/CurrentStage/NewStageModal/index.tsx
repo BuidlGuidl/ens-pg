@@ -26,19 +26,14 @@ type NewStageModalProps = {
 
 export const NewStageModal = forwardRef<HTMLDialogElement, NewStageModalProps>(
   ({ grantId, closeModal, previousStage }, ref) => {
-    const { formMethods } = useFormMethods<NewStageModalFormValues>({
+    const { formMethods, getCommonOptions } = useFormMethods<NewStageModalFormValues>({
       schema: newStageModalFormSchema,
       defaultValues: {
         milestones: [{ description: "", proposedDeliverables: "", amount: 0, proposedCompletionDate: new Date() }],
       },
     });
 
-    const {
-      handleSubmit,
-      control,
-      watch,
-      formState: { errors },
-    } = formMethods;
+    const { handleSubmit, control, watch } = formMethods;
 
     const feedbackModalRef = useRef<HTMLDialogElement>(null);
 
@@ -115,27 +110,18 @@ export const NewStageModal = forwardRef<HTMLDialogElement, NewStageModalProps>(
                         <FormTextarea
                           label="Description"
                           showMessageLength
-                          {...formMethods.register(`milestones.${index}.description`)}
-                          error={errors?.milestones?.[index]?.description?.message}
+                          {...getCommonOptions(`milestones.${index}.description`)}
                         />
                         <FormTextarea
                           label="Detail of Deliverables"
                           showMessageLength
-                          {...formMethods.register(`milestones.${index}.proposedDeliverables`)}
-                          error={errors?.milestones?.[index]?.proposedDeliverables?.message}
+                          {...getCommonOptions(`milestones.${index}.proposedDeliverables`)}
                         />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-x-16 sm:gap-y-1">
-                          <FormInputNumber
-                            label="Budget (USDC)"
-                            {...formMethods.register(`milestones.${index}.amount`, {
-                              setValueAs: value => parseInt(value),
-                            })}
-                            error={errors?.milestones?.[index]?.amount?.message}
-                          />
+                          <FormInputNumber label="Budget (USDC)" {...getCommonOptions(`milestones.${index}.amount`)} />
                           <FormInputDate
                             label="Deadline"
-                            name={`milestones.${index}.proposedCompletionDate`}
-                            error={errors?.milestones?.[index]?.proposedCompletionDate?.message}
+                            {...getCommonOptions(`milestones.${index}.proposedCompletionDate`)}
                           />
                         </div>
                       </div>
