@@ -30,6 +30,7 @@ export const FormInputNumber = ({ error, label, name, required }: FormInputProps
           type="number"
           min="1"
           placeholder="0"
+          onWheel={e => e.currentTarget.blur()}
         />
       </label>
       <FormErrorMessage error={error} />
