@@ -22,11 +22,20 @@ export const useFormMethods = <FormValues extends FieldValues>({
 
   const requiredFields = getRequiredFields(schema);
 
-  const getCommonOptions = (name: Path<FormValues>) => ({
-    name,
-    error: errors[name]?.message,
-    required: requiredFields.includes(name),
-  });
+  const getCommonOptions = (name: Path<FormValues>) => {
+    const splitName = name.split(".");
+
+    const error = splitName.reduce<FieldValues | undefined>((acc, curr) => {
+      if (!acc) return undefined;
+      return acc[curr];
+    }, errors as FieldValues);
+
+    return {
+      name,
+      error: error?.message as string | undefined,
+      required: requiredFields.includes(name),
+    };
+  };
 
   return {
     getCommonOptions,
