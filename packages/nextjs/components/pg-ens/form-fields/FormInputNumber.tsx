@@ -28,7 +28,6 @@ export const FormInputNumber = ({ error, label, name, required }: FormInputProps
           className={`input input-bordered mt-1 w-full${error ? " input-error" : ""}`}
           autoComplete="off"
           type="number"
-          min="1"
           placeholder="0"
           onWheel={e => e.currentTarget.blur()}
         />
