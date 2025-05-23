@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FieldValues, useForm } from "react-hook-form";
+import { FieldValues, Path, useForm } from "react-hook-form";
 import * as z from "zod";
 
 export const getRequiredFields = (schema: z.AnyZodObject) => {
@@ -22,11 +22,20 @@ export const useFormMethods = <FormValues extends FieldValues>({
 
   const requiredFields = getRequiredFields(schema);
 
-  const getCommonOptions = (name: keyof FormValues) => ({
-    name,
-    error: errors[name as string]?.message,
-    required: requiredFields.includes(name as string),
-  });
+  const getCommonOptions = (name: Path<FormValues>) => {
+    const splitName = name.split(".");
+
+    const error = splitName.reduce<FieldValues | undefined>((acc, curr) => {
+      if (!acc) return undefined;
+      return acc[curr];
+    }, errors as FieldValues);
+
+    return {
+      name,
+      error: error?.message as string | undefined,
+      required: requiredFields.includes(name),
+    };
+  };
 
   return {
     getCommonOptions,

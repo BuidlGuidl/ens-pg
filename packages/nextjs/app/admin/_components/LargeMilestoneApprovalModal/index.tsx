@@ -168,7 +168,13 @@ export const LargeMilestoneApprovalModal = forwardRef<
               >
                 Cancel
               </Button>
-              <Button variant="green" type="submit" className="!px-4 self-center" disabled={Boolean(loadingStatus)}>
+              <Button
+                variant="green"
+                type="submit"
+                className="!px-4 self-center"
+                size="sm"
+                disabled={Boolean(loadingStatus)}
+              >
                 <span>{milestone.status === "verified" ? "Final Approve" : "Approve"}</span>
               </Button>
             </div>
