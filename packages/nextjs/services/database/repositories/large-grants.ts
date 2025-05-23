@@ -18,8 +18,12 @@ export async function getAllLargeGrants() {
         orderBy: [desc(largeStages.stageNumber)],
         with: {
           milestones: {
-            orderBy: [desc(largeMilestones.milestoneNumber)],
+            orderBy: [asc(largeMilestones.milestoneNumber)],
+            with: {
+              privateNotes: true,
+            },
           },
+          privateNotes: true,
         },
       },
     },

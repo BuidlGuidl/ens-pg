@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ApprovalVoteModal } from "./ApprovalVoteModal";
+import { ExportGrantMarkdown } from "./ExportGrantMarkdown";
 import { FinalApproveModal } from "./FinalApproveModal";
 import { PrivateNoteModal } from "./PrivateNoteModal";
 import { RejectModal } from "./RejectModal";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
+import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Button } from "~~/components/pg-ens/Button";
 import { FormErrorMessage } from "~~/components/pg-ens/form-fields/FormErrorMessage";
@@ -49,6 +51,22 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
 
   const milestonesToShow = latestStage.stageNumber > 1 ? latestStage.milestone : proposal.milestones;
 
+  const [showMarkdown, setShowMarkdown] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const markdown = ExportGrantMarkdown({ grant: proposal });
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+      alert("Failed to copy!");
+    }
+  };
+
   useEffect(() => {
     // waits for render to calculate
     setIsDefaultExpanded(!isElementClamped(milesonesRef.current));
@@ -64,7 +82,17 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
         <div>{getFormattedDate(latestStage.submitedAt as Date)}</div>
       </div>
       <div className="px-5 py-8 bg-gray-100">
-        <h2 className="text-2xl font-bold mb-0">{proposal.title}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold mb-0">{proposal.title}</h2>
+          <button
+            type="button"
+            className="ml-2 p-1 rounded hover:bg-gray-200"
+            onClick={() => setShowMarkdown(true)}
+            title="Export to Markdown"
+          >
+            <ClipboardIcon className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
         <Link
           href={`/grants/${proposal.id}`}
           className="text-gray-500 underline flex items-center gap-1"
@@ -191,6 +219,26 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
         grantName={proposal.title}
         closeModal={() => privateNoteModalRef.current?.close()}
       />
+
+      {showMarkdown && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-2xl w-full">
+            <h2 className="text-xl font-bold mb-4">Exported Markdown</h2>
+            <textarea className="w-full h-64 p-2 border rounded mb-4" value={markdown} readOnly />
+            <div className="flex justify-end gap-2">
+              <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={handleCopy}>
+                {copied ? "Copied!" : "Copy to Clipboard"}
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowMarkdown(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

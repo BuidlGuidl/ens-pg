@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import ExportGrantsToMarkdown from "./_components/ExportGrantsToMarkdown";
 import { LargeGrantProposal } from "./_components/LargeGrantProposal";
 import { LargeMilestoneCompleted } from "./_components/LargeMilestoneCompleted";
 import { Proposal } from "./_components/Proposal";
@@ -65,6 +66,7 @@ const Admin: NextPage = async () => {
 
   return (
     <div className="flex flex-col flex-grow px-4 py-10 sm:py-20">
+      <ExportGrantsToMarkdown />
       <h1 className="text-3xl text-center font-extrabold !mb-0">Pending proposals</h1>
 
       <div className="mt-10 mx-auto grid xl:grid-cols-3 gap-4 sm:gap-8 w-full">
