@@ -76,22 +76,22 @@ export const LargeGrantItem = ({ grant, latestsShownStatus }: GrantItemProps) =>
       <div className="px-4 py-8 bg-gray-100 mb-0 shadow-sm">
         <div className="flex items-start mb-6">
           {isAdmin ? (
-            <Link href={`/large-grants/${grant.id}`} className="hover:underline flex items-start">
-              <h2 className="text-2xl font-bold pr-2 flex-grow flex items-center">
-                {grant.title}
-                <button
-                  type="button"
-                  className="ml-2 p-1 rounded hover:bg-gray-200"
-                  onClick={e => {
-                    e.preventDefault();
-                    setShowMarkdown(true);
-                  }}
-                  title="Export to Markdown"
-                >
-                  <ClipboardIcon className="w-5 h-5 text-gray-500" />
-                </button>
-              </h2>
-            </Link>
+            <div className="flex items-center">
+              <Link href={`/large-grants/${grant.id}`} className="hover:underline">
+                <h2 className="text-2xl font-bold pr-2">{grant.title}</h2>
+              </Link>
+              <button
+                type="button"
+                className="ml-2 p-1 rounded hover:bg-gray-200"
+                onClick={e => {
+                  e.preventDefault();
+                  setShowMarkdown(true);
+                }}
+                title="Export to Markdown"
+              >
+                <ClipboardIcon className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
           ) : (
             <h2 className="text-2xl font-bold">{grant.title}</h2>
           )}
