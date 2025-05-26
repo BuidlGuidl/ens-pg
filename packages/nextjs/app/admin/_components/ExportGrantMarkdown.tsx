@@ -1,6 +1,7 @@
 import { formatEther } from "viem";
 import { AdminGrant } from "~~/types/utils";
 import { getFormattedDateWithDay } from "~~/utils/getFormattedDate";
+import { multilineStringToMarkdown } from "~~/utils/multiline-string-to-markdown";
 
 export function ExportGrantMarkdown({ grant }: { grant: AdminGrant }) {
   let md = `## ETH Grant: ${grant.title}\n`;
@@ -16,7 +17,7 @@ export function ExportGrantMarkdown({ grant }: { grant: AdminGrant }) {
   md += `- **Email:** ${grant.email}\n`;
   md += `- **Twitter:** ${grant.twitter}\n`;
   md += `- **Telegram:** ${grant.telegram}\n`;
-  md += `### Description\n${grant.description}\n\n`;
+  md += `### Description\n${multilineStringToMarkdown(grant.description)}\n\n`;
 
   md += `### Stages\n`;
   grant.stages.forEach(stage => {
@@ -31,15 +32,17 @@ export function ExportGrantMarkdown({ grant }: { grant: AdminGrant }) {
     }
 
     if (stage.stageNumber > 1) {
-      md += `##### Milestones\n\n ${"milestone" in stage ? stage.milestone ?? "" : ""}\n`;
+      md += `##### Milestones\n\n ${
+        "milestone" in stage && stage.milestone ? multilineStringToMarkdown(stage.milestone) : ""
+      }\n`;
     } else {
-      md += `##### Milestones\n\n  ${grant.milestones}\n`;
+      md += `##### Milestones\n\n  ${multilineStringToMarkdown(grant.milestones)}\n`;
     }
 
     if (stage.privateNotes?.length) {
       md += `##### Private Notes\n`;
       stage.privateNotes.forEach(note => {
-        md += `- ${note.note} (by ${note.authorAddress})\n`;
+        md += `- ${multilineStringToMarkdown(note.note)} (by ${note.authorAddress})\n`;
       });
     }
   });
