@@ -22,12 +22,12 @@ export function ExportGrantMarkdown({ grant }: { grant: AdminGrant }) {
   grant.stages.forEach(stage => {
     md += `#### Stage ${stage.stageNumber} (${stage.status})\n`;
 
-    if (stage.stageNumber > 1 && "grantAmount" in stage && stage.grantAmount) {
-      md += `- **Grant Amount:** ${formatEther(stage.grantAmount)} ETH\n`;
+    if (stage.stageNumber === 1 && grant.requestedFunds) {
+      md += `- **Grant Requested Amount:** ${formatEther(grant.requestedFunds)} ETH\n`;
     }
 
-    if (stage.stageNumber === 1 && grant.requestedFunds) {
-      md += `- **Grant Amount:** ${formatEther(grant.requestedFunds)} ETH\n`;
+    if ("grantAmount" in stage && stage.grantAmount) {
+      md += `- **Grant Amount:** ${formatEther(stage.grantAmount)} ETH\n`;
     }
 
     if (stage.stageNumber > 1) {
