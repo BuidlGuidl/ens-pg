@@ -31,19 +31,19 @@ export function ExportGrantMarkdown({ grant }: { grant: AdminGrant }) {
       md += `- **Grant Amount:** ${formatEther(stage.grantAmount)} ETH\n`;
     }
 
+    if (stage.privateNotes?.length) {
+      md += `##### Private Notes\n`;
+      stage.privateNotes.forEach(note => {
+        md += `- ${multilineStringToMarkdown(note.note)} (by ${note.authorAddress})\n`;
+      });
+    }
+
     if (stage.stageNumber > 1) {
       md += `##### Milestones\n\n ${
         "milestone" in stage && stage.milestone ? multilineStringToMarkdown(stage.milestone) : ""
       }\n`;
     } else {
       md += `##### Milestones\n\n  ${multilineStringToMarkdown(grant.milestones)}\n`;
-    }
-
-    if (stage.privateNotes?.length) {
-      md += `##### Private Notes\n`;
-      stage.privateNotes.forEach(note => {
-        md += `- ${multilineStringToMarkdown(note.note)} (by ${note.authorAddress})\n`;
-      });
     }
   });
   md += "\n";
