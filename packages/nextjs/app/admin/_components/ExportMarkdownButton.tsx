@@ -23,7 +23,7 @@ export default function ExportMarkdownButton({ markdown }: { markdown: string })
         className="mb-6 self-end px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         onClick={() => setShow(true)}
       >
-        Export to Markdown
+        Export All Grants
       </button>
       {show && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
