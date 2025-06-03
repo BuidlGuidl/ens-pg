@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
     await notifyTelegramBot("largeGrant", {
       id: result.grantId,
-      ...formattedBody,
+      ...body,
       builderAddress,
     });
 

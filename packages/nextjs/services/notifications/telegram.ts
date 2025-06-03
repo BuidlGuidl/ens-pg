@@ -1,3 +1,5 @@
+import { getLargeGrantById } from "../database/repositories/large-grants";
+import { getMilestoneByIdWithRelatedData } from "../database/repositories/large-milestones";
 import { CreateNewGrantReqBody } from "~~/app/api/grants/new/route";
 import { CreateNewLargeGrantReqBody } from "~~/app/api/large-grants/new/route";
 import { CreateNewLargeStageReqBody } from "~~/app/api/large-stages/new/route";
@@ -7,17 +9,21 @@ import { GrantWithStages } from "~~/app/grants/[grantId]/page";
 const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL;
 const TELEGRAM_WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
+export type LargeGrantDataFromDB = Awaited<ReturnType<typeof getLargeGrantById>>;
+export type MilestoneDataFromDB = Awaited<ReturnType<typeof getMilestoneByIdWithRelatedData>>;
+
 type StageData = {
   newStage?: CreateNewStageReqBody;
   newLargeStage?: CreateNewLargeStageReqBody;
   grant?: GrantWithStages;
-  largeGrant?: CreateNewLargeGrantReqBody;
+  largeGrant?: CreateNewLargeGrantReqBody | LargeGrantDataFromDB;
+  largeMilestone?: MilestoneDataFromDB;
 };
 
 type GrantData = CreateNewGrantReqBody & { builderAddress: string };
 type LargeGrantData = CreateNewLargeGrantReqBody & { builderAddress: string };
 
-export async function notifyTelegramBot<T extends "grant" | "stage" | "largeGrant" | "largeStage">(
+export async function notifyTelegramBot<T extends "grant" | "stage" | "largeGrant" | "largeStage" | "largeMilestone">(
   endpoint: T,
   data: T extends "grant" ? GrantData : T extends "largeGrant" ? LargeGrantData : StageData,
 ) {

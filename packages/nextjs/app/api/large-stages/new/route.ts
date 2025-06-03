@@ -71,6 +71,7 @@ export async function POST(req: Request) {
 
     await notifyTelegramBot("largeStage", {
       newLargeStage: body,
+      largeGrant: grant,
     });
 
     return NextResponse.json({ stageId: createdStage.stageId }, { status: 201 });
