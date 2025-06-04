@@ -36,6 +36,7 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
   const milesonesRef = useRef<HTMLDivElement>(null);
   const [isDefaultExpanded, setIsDefaultExpanded] = useState(true);
   const [isExpandedByClick, setIsExpandedByClick] = useState(false);
+  const [canVote, setCanVote] = useState(true);
   const { address } = useAccount();
 
   const privateNoteModalRef = useRef<HTMLDialogElement>(null);
@@ -45,7 +46,6 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
 
   const latestStage = proposal.stages[0];
   const { privateNotes, approvalVotes } = latestStage;
-  const canVote = !approvalVotes || approvalVotes.every(vote => vote.authorAddress !== address);
 
   const isFinalApproveAvailable = approvalVotes && approvalVotes.length + 1 >= MINIMAL_VOTES_FOR_FINAL_APPROVAL;
 
@@ -71,6 +71,10 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
     // waits for render to calculate
     setIsDefaultExpanded(!isElementClamped(milesonesRef.current));
   }, []);
+
+  useEffect(() => {
+    setCanVote(!approvalVotes || approvalVotes.every(vote => vote.authorAddress !== address));
+  }, [approvalVotes, address]);
 
   return (
     <div className="card bg-white text-primary-content w-full max-w-lg shadow-center">
