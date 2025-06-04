@@ -391,4 +391,12 @@ contract LargeGrant is Pausable, AccessControl {
 	function unpause() public onlyRole(DEFAULT_ADMIN_ROLE) {
 		_unpause();
 	}
+
+	function withdrawFunds(address _token) public onlyRole(DEFAULT_ADMIN_ROLE) {
+		uint256 remainingBalance = ERC20(_token).balanceOf(address(this));
+
+		if (remainingBalance > 0) {
+			ERC20(_token).transfer(msg.sender, remainingBalance);
+		}
+	}
 }
