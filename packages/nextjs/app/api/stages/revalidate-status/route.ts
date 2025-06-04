@@ -37,7 +37,14 @@ export async function POST(request: Request) {
     const publicClient = createPublicClient({
       chain: targetNetwork,
       cacheTime: 0,
-      transport: http(getAlchemyHttpUrl(targetNetwork.id)),
+      transport: http(getAlchemyHttpUrl(targetNetwork.id), {
+        fetchOptions: {
+          headers: {
+            Origin: "https://builder.ensgrants.xyz",
+            Referer: "https://builder.ensgrants.xyz",
+          },
+        },
+      }),
     });
 
     const grantInfo = await publicClient.readContract({
