@@ -17,7 +17,9 @@ Before you begin, you need to install the following tools:
 yarn install
 ```
 
-2. Spin up the Postgres database service + create database + seed
+2. Copy *packages/nextjs/.env.example* file to *packages/nextjs/.env.development* and review the data.
+
+3. Spin up the Postgres database service + create database + seed
 
 ```
 docker-compose up -d
@@ -27,19 +29,19 @@ yarn seed
 
 See more info about the database in the section below
 
-3. Run a local network in the first terminal:
+4. Run a local network in the first terminal:
 
 ```
 yarn chain
 ```
 
-4. On a second terminal, deploy the contract:
+5. On a second terminal, deploy the contract:
 
 ```
 yarn deploy
 ```
 
-5. On a third terminal, start your NextJS app:
+6. On a third terminal, start your NextJS app:
 
 ```
 yarn start
