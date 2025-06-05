@@ -59,6 +59,7 @@ export async function getAllGrantsWithStagesAndPrivateNotes() {
         with: {
           privateNotes: true,
           approvalVotes: true,
+          rejectVotes: true,
         },
       },
     },
