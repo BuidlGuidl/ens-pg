@@ -40,6 +40,13 @@ export const EIP_712_TYPES__STAGE_APPROVAL_VOTE = {
   ],
 } as const;
 
+export const EIP_712_TYPES__STAGE_REJECT_VOTE = {
+  Message: [
+    { name: "stageId", type: "string" },
+    { name: "statusNote", type: "string" },
+  ],
+} as const;
+
 export const EIP_712_TYPES__LARGE_STAGE_APPROVAL_VOTE = {
   Message: [{ name: "stageId", type: "string" }],
 } as const;

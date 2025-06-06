@@ -36,6 +36,7 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
   const milesonesRef = useRef<HTMLDivElement>(null);
   const [isDefaultExpanded, setIsDefaultExpanded] = useState(true);
   const [isExpandedByClick, setIsExpandedByClick] = useState(false);
+  const [canReject, setCanReject] = useState(true);
   const { address } = useAccount();
 
   const privateNoteModalRef = useRef<HTMLDialogElement>(null);
@@ -44,10 +45,11 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
   const rejectModalRef = useRef<HTMLDialogElement>(null);
 
   const latestStage = proposal.stages[0];
-  const { privateNotes, approvalVotes } = latestStage;
+  const { privateNotes, approvalVotes, rejectVotes } = latestStage;
   const canVote = !approvalVotes || approvalVotes.every(vote => vote.authorAddress !== address);
 
   const isFinalApproveAvailable = approvalVotes && approvalVotes.length + 1 >= MINIMAL_VOTES_FOR_FINAL_APPROVAL;
+  const isFinalRejectAvailable = rejectVotes && rejectVotes.length + 1 >= MINIMAL_VOTES_FOR_FINAL_APPROVAL;
 
   const milestonesToShow = latestStage.stageNumber > 1 ? latestStage.milestone : proposal.milestones;
 
@@ -66,6 +68,10 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
       alert("Failed to copy!");
     }
   };
+
+  useEffect(() => {
+    setCanReject(!rejectVotes || rejectVotes.every(vote => vote.authorAddress !== address));
+  }, [rejectVotes, address]);
 
   useEffect(() => {
     // waits for render to calculate
@@ -118,6 +124,28 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
             </>
           )}
         </div>
+        {(approvalVotes.length > 0 || rejectVotes.length > 0) && (
+          <div className="flex gap-1 justify-end">
+            {approvalVotes.map(vote => (
+              <div
+                key={vote.id}
+                className="tooltip lg:tooltip-top tooltip-left"
+                data-tip={`Pre-approved by ${vote.authorAddress}`}
+              >
+                <div>👍</div>
+              </div>
+            ))}
+            {rejectVotes.map(vote => (
+              <div
+                key={vote.id}
+                className="tooltip lg:tooltip-top tooltip-left"
+                data-tip={`Pre-rejected by ${vote.authorAddress}`}
+              >
+                <div>👎</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="p-5">
@@ -175,13 +203,17 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
               </div>
             )}
           </div>
-          <Button
-            variant="red-secondary"
-            size="sm"
-            onClick={() => rejectModalRef && rejectModalRef.current?.showModal()}
-          >
-            Reject
-          </Button>
+          <div className="flex flex-col gap-1">
+            <Button
+              variant={isFinalRejectAvailable ? "red" : "red-secondary"}
+              size="sm"
+              onClick={() => rejectModalRef && rejectModalRef.current?.showModal()}
+              disabled={!canReject}
+            >
+              Reject
+            </Button>
+            {!canReject && <FormErrorMessage error="Voted" className="text-center" />}
+          </div>
         </div>
 
         {privateNotes?.length > 0 && (
@@ -212,7 +244,12 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
         grantName={proposal.title}
         closeModal={() => approvalVoteModalRef.current?.close()}
       />
-      <RejectModal ref={rejectModalRef} stage={latestStage} grantName={proposal.title} />
+      <RejectModal
+        ref={rejectModalRef}
+        stage={latestStage}
+        grantName={proposal.title}
+        closeModal={() => rejectModalRef.current?.close()}
+      />
       <PrivateNoteModal
         ref={privateNoteModalRef}
         stage={latestStage}
