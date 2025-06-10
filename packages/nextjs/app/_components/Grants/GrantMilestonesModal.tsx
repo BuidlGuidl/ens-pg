@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import { formatEther } from "viem";
 import { WithdrawalItems } from "~~/hooks/pg-ens/useWithdrawals";
-import { getFormattedDate } from "~~/utils/getFormattedDate";
+import { getFormattedDateWithDay } from "~~/utils/getFormattedDate";
 import { multilineStringToTsx } from "~~/utils/multiline-string-to-tsx";
 
 type GrantMilestonesModalProps = {
@@ -33,7 +33,7 @@ export const GrantMilestonesModal = forwardRef<HTMLDialogElement, GrantMilestone
                     {formatEther(BigInt(withdrawal.amount))} ETH
                   </div>
                 </div>
-                <div>{getFormattedDate(new Date(+withdrawal.timestamp * 1000)) || "-"}</div>
+                <div>{getFormattedDateWithDay(new Date(+withdrawal.timestamp * 1000)) || "-"}</div>
               </div>
               <div className="mt-2">{multilineStringToTsx(withdrawal.reason || "-")}</div>
             </div>

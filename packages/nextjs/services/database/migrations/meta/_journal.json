@@ -15,6 +15,13 @@
       "when": 1732626708446,
       "tag": "0001_friendly_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1748277766951,
+      "tag": "0002_mysterious_grey_gargoyle",
+      "breakpoints": true
     }
   ]
 }

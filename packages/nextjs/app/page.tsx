@@ -1,6 +1,7 @@
 import { ApprovedGrants } from "./_components/Grants";
 import { WorkflowItem } from "./_components/WorkflowItem";
-import { Stats } from "./_components/stats";
+import { GrantsStats } from "./_components/stats/GrantsStats";
+import { LargeGrantsStats } from "./_components/stats/LargeGrantsStats";
 import type { NextPage } from "next";
 import { Button } from "~~/components/pg-ens/Button";
 
@@ -20,7 +21,7 @@ const workflowItems = [
   {
     title: "Deliver your milestones",
     description:
-      "If your project is selected, you will begin working on the milestones outlined in your submission. While withdrawals do not need approval, each grant stage and its milestones will be reviewed by our stewards. Please ensure proof of completion is clear.",
+      "If your project is selected, you will begin working on the milestones outlined in your submission. Please ensure proof of completion is clear.",
   },
   {
     title: "Apply for another stage",
@@ -46,20 +47,44 @@ const Home: NextPage = () => {
             resources, PG Builder Grants offer a pathway to secure the funding you need to make a lasting difference.
           </p>
         </div>
-        <Stats />
+
+        <div className="mt-8 flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 lg:gap-40">
+          <GrantsStats />
+          <LargeGrantsStats />
+        </div>
       </div>
 
       <div className="bg-secondary py-10 sm:py-20 px-4 flex flex-col items-center w-full">
         <h2 className="text-3xl font-black !mb-0">How does it work</h2>
 
-        <div className="my-12 grid text-sm sm:grid-cols-2 xl:grid-cols-4 max-w-screen-2xl gap-8">
+        <div className="mt-12 grid text-sm sm:grid-cols-2 xl:grid-cols-4 max-w-screen-2xl gap-8">
           {workflowItems.map(({ title, description }, idx) => (
             <WorkflowItem key={title} step={idx + 1} title={title} description={description} />
           ))}
         </div>
-        <Button link href="/apply">
-          Apply for a grant
-        </Button>
+      </div>
+
+      <div className="w-full mx-auto grid md:grid-cols-2">
+        <div className="text-center bg-pale-rose flex flex-col items-center py-10 sm:py-16 px-4">
+          <h2 className="text-3xl font-bold mb-4">Small grants (up to 2 ETH)</h2>
+          <p className="mb-8 max-w-lg">
+            Receive up to 2 ETH in a stream that unlocks over 30 days. While milestone withdrawals do not need approval,
+            each grant stage and its milestones will be reviewed by our stewards.
+          </p>
+          <Button link href="/apply">
+            Apply for a grant
+          </Button>
+        </div>
+
+        <div className="text-center bg-light-purple flex flex-col items-center py-10 sm:py-16 px-4">
+          <h2 className="text-3xl font-bold mb-4">Large grants (up to 50k USDC)</h2>
+          <p className="mb-8 max-w-lg">
+            Milestone funds will be unlocked and sent to you once the milestone completion is reviewed by our stewards.
+          </p>
+          <Button link href="/large-grant-apply">
+            Apply for a grant
+          </Button>
+        </div>
       </div>
 
       <ApprovedGrants />

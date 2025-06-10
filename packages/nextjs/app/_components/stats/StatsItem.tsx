@@ -1,12 +1,20 @@
 type StatsItemProps = {
   value: number;
   description: string;
+  large?: boolean;
+  secondary?: boolean;
 };
 
-export const StatsItem = ({ value, description }: StatsItemProps) => {
+export const StatsItem = ({ value, description, large, secondary }: StatsItemProps) => {
   return (
-    <div className="bg-white rounded-lg px-4 py-5 text-center w-full max-w-96 sm:w-44 shadow-center">
-      <div className="text-primary text-3xl font-extrabold">{value}</div>
+    <div
+      className={`px-4 py-4 text-center ${
+        secondary ? `w-32 ${large ? "bg-secondary" : "bg-pale-rose"}` : "bg-white w-52"
+      }`}
+    >
+      <div className={`text-3xl font-extrabold ${large ? "text-primary" : "text-medium-purple"}`}>
+        {value.toLocaleString()}
+      </div>
       <div className="font-semibold">{description}</div>
     </div>
   );

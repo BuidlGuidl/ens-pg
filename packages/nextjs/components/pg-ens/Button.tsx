@@ -3,7 +3,7 @@
 import { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
 import Link from "next/link";
 
-type Variant = "primary" | "secondary" | "green" | "green-secondary" | "red" | "red-secondary";
+type Variant = "primary" | "secondary" | "green" | "green-secondary" | "red" | "red-secondary" | "purple-secondary";
 
 type ButtonProps = {
   variant?: Variant;
@@ -53,6 +53,9 @@ export const Button = ({
   }
   if (variant === "red-secondary") {
     variantClassNames = "bg-error hover:bg-error text-primary-red";
+  }
+  if (variant === "purple-secondary") {
+    variantClassNames = "bg-light-purple hover:bg-light-purple text-primary";
   }
 
   const allClassNames = `btn border-none ${sharedButtonClassNames} ${sizeClassNames} ${variantClassNames} ${className} ${

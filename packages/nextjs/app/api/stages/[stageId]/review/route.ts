@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { parseEther, recoverTypedDataAddress } from "viem";
+import { createApprovalVote } from "~~/services/database/repositories/approval-votes";
 import { StageUpdate, getStageByIdWithGrantAndVotes, updateStage } from "~~/services/database/repositories/stages";
 import { MINIMAL_VOTES_FOR_FINAL_APPROVAL } from "~~/utils/approval-votes";
 import { authOptions } from "~~/utils/auth";
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest, { params }: { params: { stageId: st
 
     if (
       body.status === "approved" &&
-      (!stage?.approvalVotes || stage.approvalVotes.length < MINIMAL_VOTES_FOR_FINAL_APPROVAL)
+      (!stage?.approvalVotes || stage.approvalVotes.length + 1 < MINIMAL_VOTES_FOR_FINAL_APPROVAL)
     ) {
       return NextResponse.json({ error: "Not enough votes for final approval" }, { status: 400 });
     }
@@ -67,6 +68,15 @@ export async function POST(req: NextRequest, { params }: { params: { stageId: st
           grantAmount: parseEther(body.grantAmount as string),
         }
       : {};
+
+    if (body.status === "approved") {
+      // Create approval vote
+      await createApprovalVote({
+        stageId: Number(stageId),
+        amount: parseEther(body.grantAmount as string),
+        authorAddress: session.user.address,
+      });
+    }
 
     await updateStage(Number(stageId), {
       status: body.status,

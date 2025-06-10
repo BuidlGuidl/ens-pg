@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { GrantItem } from "./GrantItem";
+import { LargeGrantItem } from "./LargeGrantItem";
 import { Pagination } from "~~/components/pg-ens/Pagination";
-import { PublicGrant } from "~~/services/database/repositories/grants";
+import { DiscriminatedPublicGrant } from "~~/types/utils";
 
 const GRANTS_PER_PAGE = 8;
 
 type ApprovedGrantsListProps = {
-  approvedGrants: PublicGrant[];
+  approvedGrants: DiscriminatedPublicGrant[];
 };
 
 export const ApprovedGrantsList = ({ approvedGrants }: ApprovedGrantsListProps) => {
@@ -22,9 +23,13 @@ export const ApprovedGrantsList = ({ approvedGrants }: ApprovedGrantsListProps) 
   return (
     <>
       <div className="my-10 grid sm:grid-cols-2 xl:grid-cols-4 gap-8 w-full max-w-96 sm:max-w-[50rem] xl:max-w-screen-2xl">
-        {currentListApprovedGrants.map(grant => (
-          <GrantItem key={grant.id} grant={grant} latestsShownStatus="approved" />
-        ))}
+        {currentListApprovedGrants.map(grant =>
+          grant.type === "largeGrant" ? (
+            <LargeGrantItem key={`${grant.type}-${grant.id}`} grant={grant} latestsShownStatus="approved" />
+          ) : (
+            <GrantItem key={`${grant.type}-${grant.id}`} grant={grant} latestsShownStatus="approved" />
+          ),
+        )}
       </div>
 
       <Pagination

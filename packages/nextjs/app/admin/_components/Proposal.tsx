@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ApprovalVoteModal } from "./ApprovalVoteModal";
+import { ExportGrantMarkdown } from "./ExportGrantMarkdown";
 import { FinalApproveModal } from "./FinalApproveModal";
 import { PrivateNoteModal } from "./PrivateNoteModal";
 import { RejectModal } from "./RejectModal";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
+import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Button } from "~~/components/pg-ens/Button";
 import { FormErrorMessage } from "~~/components/pg-ens/form-fields/FormErrorMessage";
@@ -45,9 +47,25 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
   const { privateNotes, approvalVotes } = latestStage;
   const canVote = !approvalVotes || approvalVotes.every(vote => vote.authorAddress !== address);
 
-  const isFinalApproveAvailable = approvalVotes && approvalVotes.length >= MINIMAL_VOTES_FOR_FINAL_APPROVAL;
+  const isFinalApproveAvailable = approvalVotes && approvalVotes.length + 1 >= MINIMAL_VOTES_FOR_FINAL_APPROVAL;
 
   const milestonesToShow = latestStage.stageNumber > 1 ? latestStage.milestone : proposal.milestones;
+
+  const [showMarkdown, setShowMarkdown] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const markdown = ExportGrantMarkdown({ grant: proposal });
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+      alert("Failed to copy!");
+    }
+  };
 
   useEffect(() => {
     // waits for render to calculate
@@ -57,31 +75,48 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
   return (
     <div className="card bg-white text-primary-content w-full max-w-lg shadow-center">
       <div className="px-5 py-3 flex justify-between items-center w-full">
-        <div className="font-bold text-xl">Stage {latestStage.stageNumber}</div>
+        <div className="font-bold text-xl flex items-center">
+          <div className="rounded-full bg-medium-purple h-3.5 w-3.5 min-w-3.5 mr-2" />
+          Stage {latestStage.stageNumber}
+        </div>
         <div>{getFormattedDate(latestStage.submitedAt as Date)}</div>
       </div>
       <div className="px-5 py-8 bg-gray-100">
-        <h2 className="text-2xl font-bold mb-0">{proposal.title}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-bold mb-0">{proposal.title}</h2>
+          <button
+            type="button"
+            className="ml-2 p-1 rounded hover:bg-gray-200"
+            onClick={() => setShowMarkdown(true)}
+            title="Export to Markdown"
+          >
+            <ClipboardIcon className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
         <Link
           href={`/grants/${proposal.id}`}
           className="text-gray-500 underline flex items-center gap-1"
           target="_blank"
         >
-          View grant page <ArrowTopRightOnSquareIcon className="w-5 h-5" />
+          View grant <ArrowTopRightOnSquareIcon className="w-5 h-5" />
         </Link>
         <div className="mt-6 flex flex-col lg:flex-row gap-1">
           <Address address={proposal.builderAddress} />
-          <span className="hidden lg:inline">·</span>
-          <Link
-            href={`/builder-grants/${proposal.builderAddress}`}
-            className="text-gray-500 underline flex items-center gap-1"
-            target="_blank"
-          >
-            <span>
-              {userSubmissionsAmount} submission{userSubmissionsAmount === 1 ? "" : "s"}
-            </span>
-            <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-          </Link>
+          {latestStage.stageNumber === 1 && (
+            <>
+              <span className="hidden lg:inline">·</span>
+              <Link
+                href={`/builder-grants/${proposal.builderAddress}`}
+                className="text-gray-500 underline flex items-center gap-1"
+                target="_blank"
+              >
+                <span>
+                  {userSubmissionsAmount} submission{userSubmissionsAmount === 1 ? "" : "s"}
+                </span>
+                <ArrowTopRightOnSquareIcon className="w-5 h-5" />
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -104,8 +139,8 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row-reverse lg:items-start justify-between gap-3 mt-4">
-          <div className="flex flex-col lg:flex-row lg:items-start gap-3">
+        <div className="flex flex-col 2xl:flex-row-reverse 2xl:items-start justify-between gap-3 mt-4">
+          <div className="flex flex-col 2xl:flex-row 2xl:items-start gap-3">
             <Button
               variant="secondary"
               size="sm"
@@ -115,13 +150,17 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
             </Button>
 
             {isFinalApproveAvailable ? (
-              <Button
-                variant="green"
-                size="sm"
-                onClick={() => finalApproveModalRef && finalApproveModalRef.current?.showModal()}
-              >
-                Final Approve
-              </Button>
+              <div className="flex flex-col gap-1">
+                <Button
+                  variant="green"
+                  size="sm"
+                  onClick={() => finalApproveModalRef && finalApproveModalRef.current?.showModal()}
+                  disabled={!canVote}
+                >
+                  Final Approve
+                </Button>
+                {!canVote && <FormErrorMessage error="Voted" className="text-center" />}
+              </div>
             ) : (
               <div className="flex flex-col gap-1">
                 <Button
@@ -132,7 +171,7 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
                 >
                   Vote for approval
                 </Button>
-                {!canVote && <FormErrorMessage error="Already voted" className="text-center" />}
+                {!canVote && <FormErrorMessage error="Voted" className="text-center" />}
               </div>
             )}
           </div>
@@ -180,6 +219,26 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
         grantName={proposal.title}
         closeModal={() => privateNoteModalRef.current?.close()}
       />
+
+      {showMarkdown && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-2xl w-full">
+            <h2 className="text-xl font-bold mb-4">Exported Markdown</h2>
+            <textarea className="w-full h-64 p-2 border rounded mb-4" value={markdown} readOnly />
+            <div className="flex justify-end gap-2">
+              <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" onClick={handleCopy}>
+                {copied ? "Copied!" : "Copy to Clipboard"}
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowMarkdown(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

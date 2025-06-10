@@ -39,3 +39,46 @@ export const EIP_712_TYPES__STAGE_APPROVAL_VOTE = {
     { name: "stageId", type: "string" },
   ],
 } as const;
+
+export const EIP_712_TYPES__LARGE_STAGE_APPROVAL_VOTE = {
+  Message: [{ name: "stageId", type: "string" }],
+} as const;
+
+export const EIP_712_TYPES__LARGE_STAGE_REJECT_VOTE = {
+  Message: [
+    { name: "stageId", type: "string" },
+    { name: "statusNote", type: "string" },
+  ],
+} as const;
+
+export const EIP_712_TYPES__REVIEW_LARGE_STAGE = {
+  Message: [
+    { name: "stageId", type: "string" },
+    { name: "action", type: "string" },
+    { name: "txHash", type: "string" },
+    { name: "statusNote", type: "string" },
+  ],
+} as const;
+
+export const EIP_712_TYPES__LARGE_MILESTONE_PRIVATE_NOTE = {
+  Message: [
+    { name: "milestoneId", type: "string" },
+    { name: "note", type: "string" },
+  ],
+} as const;
+
+export const EIP_712_TYPES__REVIEW_LARGE_MILESTONE = {
+  Message: [
+    { name: "milestoneId", type: "string" },
+    { name: "action", type: "string" },
+    { name: "txHash", type: "string" },
+    { name: "statusNote", type: "string" },
+  ],
+} as const;
+
+export const EIP_712_TYPES__APPLY_FOR_LARGE_STAGE = {
+  Message: [
+    { name: "stage_number", type: "string" },
+    { name: "milestones", type: "string" },
+  ],
+} as const;

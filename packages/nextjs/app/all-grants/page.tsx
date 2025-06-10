@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { AllGrantsList } from "~~/app/_components/Grants/AllGrantsList";
 import { SignInBtn } from "~~/components/pg-ens/SignInBtn";
 import { getAllGrants } from "~~/services/database/repositories/grants";
+import { getAllLargeGrants } from "~~/services/database/repositories/large-grants";
+import { DiscriminatedAdminGrant } from "~~/types/utils";
 import { authOptions } from "~~/utils/auth";
 
 export const revalidate = 0;
@@ -24,7 +26,15 @@ export default async function AllGrantsPage() {
     return redirect("/");
   }
 
-  const allGrants = await getAllGrants();
+  const grants: DiscriminatedAdminGrant[] = (await getAllGrants()).map(grant => ({ ...grant, type: "grant" }));
+  const largeGrants: DiscriminatedAdminGrant[] = (await getAllLargeGrants()).map(grant => ({
+    ...grant,
+    type: "largeGrant",
+  }));
+
+  const allGrants: DiscriminatedAdminGrant[] = [...grants, ...largeGrants].sort(
+    (a, b) => (b.submitedAt?.getTime() ?? 0) - (a.submitedAt?.getTime() ?? 0),
+  );
 
   return (
     <div className="py-10 px-4 flex flex-col items-center w-full">

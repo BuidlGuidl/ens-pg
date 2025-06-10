@@ -82,7 +82,12 @@ export const GrantsList = ({ address }: GrantsListProps) => {
               <div className="p-5 flex flex-col justify-between flex-grow">
                 <div className="text-gray-400 line-clamp-4">{multilineStringToTsx(grant.description)}</div>
                 {showGrantDetailsButton && (
-                  <Button className="mt-6" variant="secondary" link href={`/grants/${grant.id}`}>
+                  <Button
+                    className="mt-6"
+                    variant="secondary"
+                    link
+                    href={`/${grant.type == "largeGrant" ? "large-" : ""}grants/${grant.id}`}
+                  >
                     Grant details
                   </Button>
                 )}

@@ -42,7 +42,13 @@ export const RejectModal = forwardRef<HTMLDialogElement, RejectModalProps>(({ st
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col space-y-1">
             <FormTextarea label="Note (visible to grantee)" {...getCommonOptions("statusNote")} />
-            <Button variant="red" type="submit" disabled={isPostingStageReview || isSigning} className="self-center">
+            <Button
+              variant="red"
+              type="submit"
+              size="sm"
+              disabled={isPostingStageReview || isSigning}
+              className="self-center"
+            >
               {(isPostingStageReview || isSigning) && <span className="loading loading-spinner"></span>}
               Reject
             </Button>

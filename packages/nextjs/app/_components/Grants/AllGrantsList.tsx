@@ -2,20 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { GrantItem } from "../Grants/GrantItem";
-import { GrantWithStages } from "~~/app/grants/[grantId]/page";
+import { LargeGrantItem } from "./LargeGrantItem";
 import { Pagination } from "~~/components/pg-ens/Pagination";
+import { DiscriminatedAdminGrant } from "~~/types/utils";
 
 const GRANTS_PER_PAGE = 8;
 
-type AllGrantsListProps = {
-  allGrants: NonNullable<GrantWithStages>[];
-};
-
-export const AllGrantsList = ({ allGrants }: AllGrantsListProps) => {
+export const AllGrantsList = ({ allGrants }: { allGrants: DiscriminatedAdminGrant[] }) => {
   const [currentListPage, setCurrentListPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [stageFilter, setStageFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   const maxStage = useMemo(() => {
     const stageNumbers = allGrants.flatMap(grant => grant.stages.map(stage => stage.stageNumber));
@@ -32,10 +30,11 @@ export const AllGrantsList = ({ allGrants }: AllGrantsListProps) => {
 
       const matchesStage = stageFilter === "all" || latestStage.stageNumber.toString() === stageFilter;
       const matchesStatus = statusFilter === "all" || latestStage.status === statusFilter;
+      const matchesType = typeFilter === "all" || grant.type === typeFilter;
 
-      return matchesSearch && matchesStage && matchesStatus;
+      return matchesSearch && matchesStage && matchesStatus && matchesType;
     });
-  }, [allGrants, searchQuery, stageFilter, statusFilter]);
+  }, [allGrants, searchQuery, stageFilter, statusFilter, typeFilter]);
 
   const currentPageGrants = filteredGrants.slice(
     (currentListPage - 1) * GRANTS_PER_PAGE,
@@ -51,6 +50,15 @@ export const AllGrantsList = ({ allGrants }: AllGrantsListProps) => {
           className="input input-bordered w-full sm:w-64"
           onChange={e => setSearchQuery(e.target.value)}
         />
+        <select
+          className="select select-bordered w-full sm:w-64"
+          value={typeFilter}
+          onChange={e => setTypeFilter(e.target.value)}
+        >
+          <option value="all">All Grants</option>
+          <option value="grant">ETH Grants</option>
+          <option value="largeGrant">USDC Grants</option>
+        </select>
         <select
           className="select select-bordered w-full sm:w-64"
           value={stageFilter}
@@ -78,8 +86,12 @@ export const AllGrantsList = ({ allGrants }: AllGrantsListProps) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 xl:gap-8 w-full my-10">
         {currentPageGrants.map(grant => (
-          <div key={grant.id} className="flex justify-center">
-            <GrantItem grant={grant} latestsShownStatus="all" />
+          <div key={`${grant.type}-${grant.id}`} className="flex justify-center">
+            {grant.type === "largeGrant" ? (
+              <LargeGrantItem grant={grant} latestsShownStatus="all" />
+            ) : (
+              <GrantItem grant={grant} latestsShownStatus="all" />
+            )}
           </div>
         ))}
       </div>

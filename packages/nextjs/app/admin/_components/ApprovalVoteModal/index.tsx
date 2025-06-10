@@ -80,6 +80,7 @@ export const ApprovalVoteModal = forwardRef<HTMLDialogElement, ApprovalVoteModal
               <FormInput label="Grant amount (in ETH)" {...getCommonOptions("grantAmount")} />
               <Button
                 type="submit"
+                size="sm"
                 variant="green-secondary"
                 disabled={isPostingApprovalVote || isSigning}
                 className="self-center"

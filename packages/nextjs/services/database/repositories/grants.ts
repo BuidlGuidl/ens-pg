@@ -13,6 +13,9 @@ export async function getAllGrants() {
       stages: {
         // this makes sure latest stage is first
         orderBy: [desc(stages.stageNumber)],
+        with: {
+          privateNotes: true,
+        },
       },
     },
   });
@@ -28,6 +31,7 @@ export async function getPublicGrants() {
       title: true,
       description: true,
       builderAddress: true,
+      submitedAt: true,
     },
     with: {
       stages: {

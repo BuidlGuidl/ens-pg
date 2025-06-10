@@ -25,7 +25,7 @@ export const FormTextarea = ({ error, label, name, showMessageLength, required }
         )}
         <textarea
           {...register(name)}
-          className={`textarea textarea-bordered mt-1 w-full${error ? " textarea-error" : ""}`}
+          className={`textarea textarea-bordered mt-1 w-full${error ? " textarea-error" : ""} min-h-[180px]`}
           autoComplete="off"
           maxLength={DEFAULT_TEXTAREA_MAX_LENGTH}
         />
