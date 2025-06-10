@@ -21,6 +21,7 @@ export async function getStageByIdWithGrantAndVotes(stageId: number) {
     with: {
       grant: true,
       approvalVotes: true,
+      rejectVotes: true,
     },
   });
 }

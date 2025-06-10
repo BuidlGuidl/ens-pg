@@ -71,6 +71,31 @@ export const approvalVotesRelations = relations(approvalVotes, ({ one }) => ({
   }),
 }));
 
+export const rejectVotes = pgTable(
+  "reject_votes",
+  {
+    id: serial("id").primaryKey(),
+    votedAt: timestamp("voted_at").default(sql`now()`),
+    stageId: integer("stage_id")
+      .references(() => stages.id)
+      .notNull(),
+    authorAddress: varchar("author_address", { length: 42 })
+      .references(() => users.address)
+      .notNull(),
+  },
+  table => ({
+    // Ensure each author can only vote once per stage
+    uniqueVotePerStage: unique().on(table.stageId, table.authorAddress),
+  }),
+);
+
+export const rejectVotesRelations = relations(rejectVotes, ({ one }) => ({
+  stage: one(stages, {
+    fields: [rejectVotes.stageId],
+    references: [stages.id],
+  }),
+}));
+
 export const privateNotes = pgTable("private_notes", {
   id: serial("id").primaryKey(),
   note: text("note").notNull(),
@@ -97,6 +122,7 @@ export const stagesRelations = relations(stages, ({ one, many }) => ({
   }),
   privateNotes: many(privateNotes),
   approvalVotes: many(approvalVotes),
+  rejectVotes: many(rejectVotes),
 }));
 
 export const largeGrants = pgTable("large_grants", {

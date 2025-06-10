@@ -9,6 +9,7 @@ import {
   largeRejectVotes,
   largeStages,
   privateNotes,
+  rejectVotes,
   stages,
   users,
 } from "./config/schema";
@@ -32,6 +33,7 @@ async function seed() {
 
   await db.delete(privateNotes).execute(); // Delete private notes first
   await db.delete(approvalVotes).execute();
+  await db.delete(rejectVotes).execute();
   await db.delete(stages).execute(); // Ensure stages are deleted before grants
   await db.delete(grants).execute(); // Delete grants
 
