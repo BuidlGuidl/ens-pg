@@ -47,3 +47,46 @@ p {
 .btn.btn-ghost {
   @apply shadow-none;
 }
+
+/* Datepicker styling */
+.react-datepicker__day--selected {
+  background-color: #af52de !important;
+  color: white !important;
+}
+
+.react-datepicker__day--selected:hover,
+.react-datepicker__day:hover {
+  background-color: #af52de !important;
+  opacity: 0.8;
+  color: white !important;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: #af52de !important;
+  color: white !important;
+}
+
+/* Force white text color for selected date */
+.react-datepicker__day.react-datepicker__day--selected {
+  color: white !important;
+}
+
+.react-datepicker__day--today {
+  color: #af52de !important;
+  font-weight: bold;
+}
+
+.react-datepicker__day--today:hover {
+  color: white !important;
+}
+
+.react-datepicker__day--selected.react-datepicker__day--outside-month {
+  color: white !important;
+}
+
+/* Header styling */
+.react-datepicker__header {
+  background-color: #f3e6fb !important;
+  border-bottom: 1px solid #f3e6fb !important;
+}
+/* End of datepicker styling */

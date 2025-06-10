@@ -1,9 +1,9 @@
 import { StatsItem } from "./StatsItem";
 import { formatEther } from "viem";
-import { getAllGrants } from "~~/services/database/repositories/grants";
+import { getPublicGrants } from "~~/services/database/repositories/grants";
 
-export const Stats = async () => {
-  const allGrants = await getAllGrants();
+export const GrantsStats = async () => {
+  const allGrants = await getPublicGrants();
   const grants = allGrants.filter(grant => {
     const latestStage = grant.stages[0];
     return (
@@ -19,10 +19,12 @@ export const Stats = async () => {
     .reduce((a, b) => (a as bigint) + (b as bigint), 0n);
 
   return (
-    <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-6">
+    <div className="inline-flex justify-center items-center gap-2 bg-white rounded-lg overflow-hidden">
       <StatsItem value={Number(Number(formatEther(ethGranted as bigint)).toFixed(2))} description="ETH granted" />
-      <StatsItem value={grants.length} description="Grants" />
-      <StatsItem value={allGrants.length} description="Proposals" />
+      <div className="flex flex-col gap-1">
+        <StatsItem value={grants.length} description="Small Grants" secondary />
+        <StatsItem value={allGrants.length} description="Proposals" secondary />
+      </div>
     </div>
   );
 };

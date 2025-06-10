@@ -1459,6 +1459,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/dom@npm:^1.0.0":
+  version: 1.6.13
+  resolution: "@floating-ui/dom@npm:1.6.13"
+  dependencies:
+    "@floating-ui/core": ^1.6.0
+    "@floating-ui/utils": ^0.2.9
+  checksum: eabab9d860d3b5beab1c2d6936287efc4d9ab352de99062380589ef62870d59e8730397489c34a96657e128498001b5672330c4a9da0159fe8b2401ac59fe314
+  languageName: node
+  linkType: hard
+
 "@floating-ui/dom@npm:^1.6.1":
   version: 1.6.8
   resolution: "@floating-ui/dom@npm:1.6.8"
@@ -1469,10 +1479,43 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/react-dom@npm:^2.1.2":
+  version: 2.1.2
+  resolution: "@floating-ui/react-dom@npm:2.1.2"
+  dependencies:
+    "@floating-ui/dom": ^1.0.0
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 25bb031686e23062ed4222a8946e76b3f9021d40a48437bd747233c4964a766204b8a55f34fa8b259839af96e60db7c6e3714d81f1de06914294f90e86ffbc48
+  languageName: node
+  linkType: hard
+
+"@floating-ui/react@npm:^0.27.3":
+  version: 0.27.5
+  resolution: "@floating-ui/react@npm:0.27.5"
+  dependencies:
+    "@floating-ui/react-dom": ^2.1.2
+    "@floating-ui/utils": ^0.2.9
+    tabbable: ^6.0.0
+  peerDependencies:
+    react: ">=17.0.0"
+    react-dom: ">=17.0.0"
+  checksum: 453bea48e52728bc1c065689bf4b7d340c65006ceab805569fcb849de01ab28527a0550c1e05dc95d3e0187c4836cc56600ab252f1ee74f1f9dfb0d6bb9144c6
+  languageName: node
+  linkType: hard
+
 "@floating-ui/utils@npm:^0.2.5":
   version: 0.2.5
   resolution: "@floating-ui/utils@npm:0.2.5"
   checksum: 32834fe0fec5ee89187f8defd0b10813d725dab7dc6ed1545ded6655630bac5d438f0c991d019d675585e118846f12391236fc2886a5c73a57576e7de3eca3f9
+  languageName: node
+  linkType: hard
+
+"@floating-ui/utils@npm:^0.2.9":
+  version: 0.2.9
+  resolution: "@floating-ui/utils@npm:0.2.9"
+  checksum: d518b80cec5a323e54a069a1dd99a20f8221a4853ed98ac16c75275a0cc22f75de4f8ac5b121b4f8990bd45da7ad1fb015b9a1e4bac27bb1cd62444af84e9784
   languageName: node
   linkType: hard
 
@@ -3130,7 +3173,6 @@ __metadata:
     "@types/nprogress": ^0
     "@types/pg": ^8.11.6
     "@types/react": ^18.0.21
-    "@types/react-copy-to-clipboard": ^5.0.4
     "@typescript-eslint/eslint-plugin": ~5.40.0
     "@uniswap/sdk-core": ~4.0.1
     "@uniswap/v2-sdk": ~3.0.1
@@ -3158,7 +3200,7 @@ __metadata:
     prettier: ~2.8.4
     qrcode.react: ~3.1.0
     react: ~18.2.0
-    react-copy-to-clipboard: ~5.1.0
+    react-datepicker: ^8.2.0
     react-dom: ~18.2.0
     react-hook-form: ^7.52.1
     react-hot-toast: ~2.4.0
@@ -3872,16 +3914,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-copy-to-clipboard@npm:^5.0.4":
-  version: 5.0.7
-  resolution: "@types/react-copy-to-clipboard@npm:5.0.7"
-  dependencies:
-    "@types/react": "*"
-  checksum: adc2970c8756e648daa06e294c422df3dc076a784344ab2ecb78a17ebd7e8e3dfd7f31e68c24267de4815cdeec573a743d952a308b45b8380f6b7912a9a8b911
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:*, @types/react@npm:^18.0.21":
+"@types/react@npm:^18.0.21":
   version: 18.3.3
   resolution: "@types/react@npm:18.3.3"
   dependencies:
@@ -6523,6 +6556,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"clsx@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "clsx@npm:2.1.1"
+  checksum: acd3e1ab9d8a433ecb3cc2f6a05ab95fe50b4a3cfc5ba47abb6cbf3754585fcb87b84e90c822a1f256c4198e3b41c7f6c391577ffc8678ad587fc0976b24fd57
+  languageName: node
+  linkType: hard
+
 "code-block-writer@npm:^10.1.1":
   version: 10.1.1
   resolution: "code-block-writer@npm:10.1.1"
@@ -6761,15 +6801,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"copy-to-clipboard@npm:^3.3.1":
-  version: 3.3.3
-  resolution: "copy-to-clipboard@npm:3.3.3"
-  dependencies:
-    toggle-selection: ^1.0.6
-  checksum: e0a325e39b7615108e6c1c8ac110ae7b829cdc4ee3278b1df6a0e4228c490442cc86444cd643e2da344fbc424b3aab8909e2fec82f8bc75e7e5b190b7c24eecf
-  languageName: node
-  linkType: hard
-
 "core-util-is@npm:~1.0.0":
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3"
@@ -6982,6 +7013,13 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.21.0
   checksum: f7be01523282e9bb06c0cd2693d34f245247a29098527d4420628966a2d9aad154bd0e90a6b1cf66d37adcb769cd108cf8a7bd49d76db0fb119af5cdd13644f4
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: fb681b242cccabed45494468f64282a7d375ea970e0adbcc5dcc92dcb7aba49b2081c2c9739d41bf71ce89ed68dd73bebfe06ca35129490704775d091895710b
   languageName: node
   linkType: hard
 
@@ -14189,15 +14227,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-copy-to-clipboard@npm:~5.1.0":
-  version: 5.1.0
-  resolution: "react-copy-to-clipboard@npm:5.1.0"
+"react-datepicker@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "react-datepicker@npm:8.2.0"
   dependencies:
-    copy-to-clipboard: ^3.3.1
-    prop-types: ^15.8.1
+    "@floating-ui/react": ^0.27.3
+    clsx: ^2.1.1
+    date-fns: ^4.1.0
   peerDependencies:
-    react: ^15.3.0 || 16 || 17 || 18
-  checksum: f00a4551b9b63c944a041a6ab46af5ef20ba1106b3bc25173e7ef9bffbfba17a613368682ab8820cfe8d4b3acc5335cd9ce20229145bcc1e6aa8d1db04c512e5
+    react: ^16.9.0 || ^17 || ^18 || ^19 || ^19.0.0-rc
+    react-dom: ^16.9.0 || ^17 || ^18 || ^19 || ^19.0.0-rc
+  checksum: 86e59c3156176ae14e19ab91fac082b5f2ee0a9dcebcb3f96a58b2bd599984ec4055457fe04f45efa1873035ecebebdbea4e61d89bf36dcb202204f120f41afd
   languageName: node
   linkType: hard
 
@@ -15907,6 +15947,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tabbable@npm:^6.0.0":
+  version: 6.2.0
+  resolution: "tabbable@npm:6.2.0"
+  checksum: f8440277d223949272c74bb627a3371be21735ca9ad34c2570f7e1752bd646ccfc23a9d8b1ee65d6561243f4134f5fbbf1ad6b39ac3c4b586554accaff4a1300
+  languageName: node
+  linkType: hard
+
 "table-layout@npm:^1.0.2":
   version: 1.0.2
   resolution: "table-layout@npm:1.0.2"
@@ -16156,13 +16203,6 @@ __metadata:
   version: 2.0.0
   resolution: "toformat@npm:2.0.0"
   checksum: c75341911a811a85c309e2c3eb8e9c7b60f26e2c629170179fc92ed339a2faf44433ebde75d4ac6dbe6f55a2aa044e1d4cd5242dbdd5e4c047babbe6defd8387
-  languageName: node
-  linkType: hard
-
-"toggle-selection@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "toggle-selection@npm:1.0.6"
-  checksum: a90dc80ed1e7b18db8f4e16e86a5574f87632dc729cfc07d9ea3ced50021ad42bb4e08f22c0913e0b98e3837b0b717e0a51613c65f30418e21eb99da6556a74c
   languageName: node
   linkType: hard
 

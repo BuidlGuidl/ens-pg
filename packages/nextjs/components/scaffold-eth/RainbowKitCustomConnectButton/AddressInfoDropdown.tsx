@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { NetworkOptions } from "./NetworkOptions";
 import { signOut } from "next-auth/react";
-import CopyToClipboard from "react-copy-to-clipboard";
 import { getAddress } from "viem";
 import { Address } from "viem";
 import { useDisconnect } from "wagmi";
@@ -14,7 +13,7 @@ import {
   QrCodeIcon,
 } from "@heroicons/react/24/outline";
 import { BlockieAvatar, isENS } from "~~/components/scaffold-eth";
-import { useOutsideClick } from "~~/hooks/scaffold-eth";
+import { useCopyToClipboard, useOutsideClick } from "~~/hooks/scaffold-eth";
 import { getTargetNetworks } from "~~/utils/scaffold-eth";
 
 const allowedNetworks = getTargetNetworks();
@@ -35,7 +34,8 @@ export const AddressInfoDropdown = ({
   const { disconnect } = useDisconnect();
   const checkSumAddress = getAddress(address);
 
-  const [addressCopied, setAddressCopied] = useState(false);
+  const { copyToClipboard: copyAddressToClipboard, isCopiedToClipboard: isAddressCopiedToClipboard } =
+    useCopyToClipboard();
 
   const [selectingNetwork, setSelectingNetwork] = useState(false);
   const dropdownRef = useRef<HTMLDetailsElement>(null);
@@ -60,33 +60,22 @@ export const AddressInfoDropdown = ({
         >
           <NetworkOptions hidden={!selectingNetwork} />
           <li className={selectingNetwork ? "hidden" : ""}>
-            {addressCopied ? (
-              <div className="btn-sm !rounded-xl flex gap-3 py-3">
-                <CheckCircleIcon
-                  className="text-xl font-normal h-6 w-4 cursor-pointer ml-2 sm:ml-0"
-                  aria-hidden="true"
-                />
-                <span className=" whitespace-nowrap">Copy address</span>
-              </div>
-            ) : (
-              <CopyToClipboard
-                text={checkSumAddress}
-                onCopy={() => {
-                  setAddressCopied(true);
-                  setTimeout(() => {
-                    setAddressCopied(false);
-                  }, 800);
-                }}
-              >
-                <div className="btn-sm !rounded-xl flex gap-3 py-3">
-                  <DocumentDuplicateIcon
-                    className="text-xl font-normal h-6 w-4 cursor-pointer ml-2 sm:ml-0"
-                    aria-hidden="true"
-                  />
-                  <span className=" whitespace-nowrap">Copy address</span>
-                </div>
-              </CopyToClipboard>
-            )}
+            <div
+              className="h-8 btn-sm rounded-xl! flex gap-3 py-3 cursor-pointer"
+              onClick={() => copyAddressToClipboard(checkSumAddress)}
+            >
+              {isAddressCopiedToClipboard ? (
+                <>
+                  <CheckCircleIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
+                  <span className="whitespace-nowrap">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <DocumentDuplicateIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
+                  <span className="whitespace-nowrap">Copy address</span>
+                </>
+              )}
+            </div>
           </li>
           <li className={selectingNetwork ? "hidden" : ""}>
             <label htmlFor="qrcode-modal" className="btn-sm !rounded-xl flex gap-3 py-3">
