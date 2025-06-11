@@ -42,7 +42,7 @@ export function ExportGrantMarkdown({ grant }: { grant: AdminGrant }) {
       md += `##### Milestones\n\n ${
         "milestone" in stage && stage.milestone ? multilineStringToMarkdown(stage.milestone) : ""
       }\n`;
-    } else {
+    } else if (grant.milestones) {
       md += `##### Milestones\n\n  ${multilineStringToMarkdown(grant.milestones)}\n`;
     }
   });

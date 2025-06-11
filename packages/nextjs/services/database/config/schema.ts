@@ -1,13 +1,22 @@
 import { relations, sql } from "drizzle-orm";
 import { bigint, date, integer, pgEnum, pgTable, serial, text, timestamp, unique, varchar } from "drizzle-orm/pg-core";
 
+export const milestonesStatusEnum = pgEnum("milestones_status", [
+  "proposed",
+  "approved",
+  "completed",
+  "verified",
+  "paid",
+  "rejected",
+]);
+
 export const grants = pgTable("grants", {
   // TODO: Should ID be a UUID? Or is it fine as a serial?
   id: serial("id").primaryKey(),
   grantNumber: integer("grant_number").notNull().default(1),
   title: varchar("title").notNull(),
   description: text("description").notNull(),
-  milestones: text("milestones").notNull(),
+  milestones: text("milestones"),
   showcaseVideoUrl: text("showcaseVideoUrl"),
   requestedFunds: bigint("requestedFunds", { mode: "bigint" }).notNull(),
   github: text("github").notNull(),
@@ -44,6 +53,31 @@ export const stages = pgTable("stages", {
   approvedTx: varchar("approved_tx", { length: 66 }),
   approvedAt: timestamp("approved_at"),
 });
+
+export const milestones = pgTable("milestones", {
+  id: serial("id").primaryKey(),
+  milestoneNumber: integer("milestone_number").notNull().default(1),
+  stageId: integer("stage_id")
+    .references(() => stages.id)
+    .notNull(),
+  description: text("description").notNull(),
+  proposedDeliverables: text("proposed_deliverables").notNull(),
+  completionProof: text("completion_proof"),
+  completedAt: timestamp("completed_at"),
+  requestedAmount: bigint("requested_amount", { mode: "bigint" }).notNull(),
+  grantedAmount: bigint("granted_amount", { mode: "bigint" }),
+  status: milestonesStatusEnum("status").notNull().default("proposed"),
+  statusNote: text("statusNote"),
+  paymentTx: varchar("payment_tx", { length: 66 }),
+  paidAt: timestamp("paid_at"),
+});
+
+export const milestonesRelations = relations(milestones, ({ one }) => ({
+  stage: one(stages, {
+    fields: [milestones.stageId],
+    references: [stages.id],
+  }),
+}));
 
 export const approvalVotes = pgTable(
   "approval_votes",
@@ -120,6 +154,7 @@ export const stagesRelations = relations(stages, ({ one, many }) => ({
     fields: [stages.grantId],
     references: [grants.id],
   }),
+  milestones: many(milestones),
   privateNotes: many(privateNotes),
   approvalVotes: many(approvalVotes),
   rejectVotes: many(rejectVotes),
@@ -161,14 +196,6 @@ export const largeStages = pgTable("large_stages", {
   approvedAt: timestamp("approved_at"),
 });
 
-export const milestonesStatusEnum = pgEnum("milestones_status", [
-  "proposed",
-  "approved",
-  "completed",
-  "verified",
-  "paid",
-  "rejected",
-]);
 export const largeMilestones = pgTable("large_milestones", {
   id: serial("id").primaryKey(),
   milestoneNumber: integer("milestone_number").notNull().default(1),
