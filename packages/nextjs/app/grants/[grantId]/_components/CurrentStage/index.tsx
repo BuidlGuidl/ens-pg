@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { GrantWithStages } from "../../page";
+import { MilestoneDetail } from "./MilestoneDetail";
 import { NewStageModal } from "./NewStageModal";
 import { WithdrawModal } from "./WithdrawModal";
 import { formatEther } from "viem";
@@ -78,6 +79,18 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
           />
         </div>
       )}
+
+      {latestStage.milestones.map(milestone => (
+        <MilestoneDetail
+          milestone={milestone}
+          key={milestone.id}
+          stage={latestStage}
+          contractGrantId={contractGrantId}
+          refetchContractInfo={async () => {
+            await Promise.all([refetchGrantInfo(), refetchUnlockedAmount()]);
+          }}
+        />
+      ))}
 
       <NewStageModal
         ref={newStageModalRef}

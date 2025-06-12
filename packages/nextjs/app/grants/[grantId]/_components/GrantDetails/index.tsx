@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { formatEther } from "viem";
 import { Address } from "~~/components/scaffold-eth";
 import { authOptions } from "~~/utils/auth";
+import { multilineStringToTsx } from "~~/utils/multiline-string-to-tsx";
 
 type GrantDetailsProps = {
   grant: NonNullable<GrantWithStages>;
@@ -29,8 +30,50 @@ export const GrantDetails = async ({ grant }: GrantDetailsProps) => {
           />
           <GrantDetailsField title="Title" description={grant.title} />
           <GrantDetailsField title="Description" description={grant.description} />
-          <GrantDetailsField title="Project milestones" description={grant.milestones} />
-          <GrantDetailsField title="Stage milestones" description={grant.stages} />
+          {grant.stages[0]?.milestones.length > 0 ? (
+            grant.stages.map(stage => (
+              <div key={stage.id} className="flex flex-col gap-2">
+                <span className="font-bold text-xl">Stage {stage.stageNumber}</span>
+                <div className="flex flex-col ml-4">
+                  {stage.milestones.map(milestone => (
+                    <div key={milestone.id} className="mb-4">
+                      <div className="font-bold text-lg">Milestone {milestone.milestoneNumber}</div>
+                      <div className="ml-4">
+                        <div>{multilineStringToTsx(milestone.description)}</div>
+                        <div className="mt-2">
+                          <strong>Detail of Deliverables</strong>:{" "}
+                          {multilineStringToTsx(milestone.proposedDeliverables)}
+                        </div>
+                        <div className="mt-2">
+                          <strong>Requested Funds</strong>: {`${formatEther(milestone.requestedAmount)} ETH`}
+                        </div>
+                        {milestone.grantedAmount && (
+                          <div className="mt-2">
+                            <strong>Granted Funds</strong>: {`${formatEther(milestone.grantedAmount)} ETH`}
+                          </div>
+                        )}
+                        {milestone.completedAt && (
+                          <div className="mt-2">
+                            <strong>Completion Date</strong>: {milestone.completedAt.toLocaleDateString()}
+                          </div>
+                        )}
+                        {milestone.completionProof && (
+                          <div className="mt-2">
+                            <strong>Completion Proof</strong>: {milestone.completionProof}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <>
+              <GrantDetailsField title="Project milestones" description={grant.milestones} />
+              <GrantDetailsField title="Stage milestones" description={grant.stages} />
+            </>
+          )}
           <div className="grid sm:grid-cols-2 sm:gap-x-16 gap-y-4">
             <GrantDetailsField title="Requested Funds" description={`${formatEther(grant.requestedFunds)} ETH`} />
             <GrantDetailsField title="Showcase Video Url" description={grant.showcaseVideoUrl || "-"} />

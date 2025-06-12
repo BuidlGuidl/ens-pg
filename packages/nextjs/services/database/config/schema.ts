@@ -10,6 +10,8 @@ export const milestonesStatusEnum = pgEnum("milestones_status", [
   "rejected",
 ]);
 
+export type MilestoneStatus = (typeof milestonesStatusEnum.enumValues)[number];
+
 export const grants = pgTable("grants", {
   // TODO: Should ID be a UUID? Or is it fine as a serial?
   id: serial("id").primaryKey(),

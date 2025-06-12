@@ -1,4 +1,4 @@
-import { InferInsertModel, InferSelectModel, desc, eq, max } from "drizzle-orm";
+import { InferInsertModel, InferSelectModel, asc, desc, eq, max } from "drizzle-orm";
 import { db } from "~~/services/database/config/postgresClient";
 import { grants, milestones, stages } from "~~/services/database/config/schema";
 
@@ -128,6 +128,11 @@ export async function getGrantById(grantId: number) {
     with: {
       stages: {
         orderBy: [desc(stages.stageNumber)],
+        with: {
+          milestones: {
+            orderBy: [asc(milestones.milestoneNumber)],
+          },
+        },
       },
     },
   });

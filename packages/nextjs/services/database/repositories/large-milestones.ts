@@ -1,11 +1,10 @@
 import { InferInsertModel, InferSelectModel, desc, eq, or } from "drizzle-orm";
 import { db } from "~~/services/database/config/postgresClient";
-import { largeMilestones, milestonesStatusEnum } from "~~/services/database/config/schema";
+import { largeMilestones } from "~~/services/database/config/schema";
 
 export type LargeMilestoneInsert = InferInsertModel<typeof largeMilestones>;
 export type LargeMilestoneUpdate = Partial<LargeMilestoneInsert>;
 export type LargeMilestone = InferSelectModel<typeof largeMilestones>;
-export type LargeMilestoneStatus = (typeof milestonesStatusEnum.enumValues)[number];
 
 // Note: not used yet
 export async function createMilestone(milestone: LargeMilestoneInsert) {

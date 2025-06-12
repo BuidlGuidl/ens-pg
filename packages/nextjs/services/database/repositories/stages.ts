@@ -1,3 +1,4 @@
+import { Milestone } from "./milestones";
 import { InferInsertModel, InferSelectModel, and, eq } from "drizzle-orm";
 import { db } from "~~/services/database/config/postgresClient";
 import { grants, stages, stagesStatusEnum } from "~~/services/database/config/schema";
@@ -5,6 +6,9 @@ import { grants, stages, stagesStatusEnum } from "~~/services/database/config/sc
 export type StageInsert = InferInsertModel<typeof stages>;
 export type StageUpdate = Partial<StageInsert>;
 export type Stage = InferSelectModel<typeof stages>;
+export type StageWithMilestones = Stage & {
+  milestones: Milestone[];
+};
 export type Status = (typeof stagesStatusEnum.enumValues)[number];
 
 export async function createStage(stage: StageInsert) {
