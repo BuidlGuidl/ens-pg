@@ -1,0 +1,1 @@
+ALTER TABLE "approval_votes" ALTER COLUMN "amount" DROP NOT NULL;

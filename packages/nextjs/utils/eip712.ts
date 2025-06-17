@@ -34,10 +34,7 @@ export const EIP_712_TYPES__STAGE_PRIVATE_NOTE = {
 } as const;
 
 export const EIP_712_TYPES__STAGE_APPROVAL_VOTE = {
-  Message: [
-    { name: "grantAmount", type: "string" },
-    { name: "stageId", type: "string" },
-  ],
+  Message: [{ name: "stageId", type: "string" }],
 } as const;
 
 export const EIP_712_TYPES__STAGE_REJECT_VOTE = {

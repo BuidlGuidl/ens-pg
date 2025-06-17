@@ -85,7 +85,7 @@ export const approvalVotes = pgTable(
   "approval_votes",
   {
     id: serial("id").primaryKey(),
-    amount: bigint("amount", { mode: "bigint" }).notNull(),
+    amount: bigint("amount", { mode: "bigint" }),
     votedAt: timestamp("voted_at").default(sql`now()`),
     stageId: integer("stage_id")
       .references(() => stages.id)

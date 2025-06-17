@@ -63,6 +63,9 @@ export async function getAllGrantsWithStagesAndPrivateNotes() {
           privateNotes: true,
           approvalVotes: true,
           rejectVotes: true,
+          milestones: {
+            orderBy: [asc(milestones.milestoneNumber)],
+          },
         },
       },
     },

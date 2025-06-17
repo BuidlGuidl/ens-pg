@@ -51,7 +51,15 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
   const isFinalApproveAvailable = approvalVotes && approvalVotes.length + 1 >= MINIMAL_VOTES_FOR_FINAL_APPROVAL;
   const isFinalRejectAvailable = rejectVotes && rejectVotes.length + 1 >= MINIMAL_VOTES_FOR_FINAL_APPROVAL;
 
-  const milestonesToShow = latestStage.stageNumber > 1 ? latestStage.milestone : proposal.milestones;
+  // Ugly ifs to handle different milestone structures
+  const milestonesToShow =
+    latestStage.stageNumber > 1
+      ? latestStage.milestones.length > 0
+        ? latestStage.milestones
+        : latestStage.milestone
+      : latestStage.milestones.length > 0
+      ? latestStage.milestones
+      : proposal.milestones;
 
   const [showMarkdown, setShowMarkdown] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -154,16 +162,45 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
         </div>
 
         <div className="mt-2">
-          <div className="font-semibold">
-            {latestStage.stageNumber > 1 ? "Stage milestones:" : "Planned milestones:"}
-          </div>
-          <div className={isExpandedByClick ? "" : "line-clamp-4"} ref={milesonesRef}>
-            {milestonesToShow ? multilineStringToTsx(milestonesToShow) : "-"}
-          </div>
-          {!isDefaultExpanded && !isExpandedByClick && milestonesToShow && (
-            <button className="bg-transparent font-semibold underline" onClick={() => setIsExpandedByClick(true)}>
-              Read more
-            </button>
+          {typeof milestonesToShow === "string" ? (
+            <>
+              <div className="font-semibold">
+                {latestStage.stageNumber > 1 ? "Stage milestones:" : "Planned milestones:"}
+              </div>
+
+              <div className={isExpandedByClick ? "" : "line-clamp-4"} ref={milesonesRef}>
+                {milestonesToShow ? multilineStringToTsx(milestonesToShow) : "-"}
+              </div>
+
+              {!isDefaultExpanded && !isExpandedByClick && milestonesToShow && (
+                <button className="bg-transparent font-semibold underline" onClick={() => setIsExpandedByClick(true)}>
+                  Read more
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <div className={isExpandedByClick ? "" : "line-clamp-1"} ref={milesonesRef}>
+                <div className="font-semibold">
+                  {latestStage.stageNumber > 1 ? "Stage milestones:" : "Planned milestones:"}
+                </div>
+
+                {milestonesToShow &&
+                  milestonesToShow.map((milestone, index) => (
+                    <div key={milestone.id} className="mt-1 first:mt-0">
+                      <div className="font-semibold">Milestone {index + 1}</div>
+                      <div>{multilineStringToTsx(milestone.description)}</div>
+                      <div>{formatEther(milestone.requestedAmount)} ETH</div>
+                    </div>
+                  ))}
+              </div>
+
+              {!isDefaultExpanded && !isExpandedByClick && milestonesToShow && (
+                <button className="bg-transparent font-semibold underline" onClick={() => setIsExpandedByClick(true)}>
+                  Show Milestones
+                </button>
+              )}
+            </>
           )}
         </div>
 
@@ -233,7 +270,7 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
       <FinalApproveModal
         ref={finalApproveModalRef}
         stage={proposal.stages[0]}
-        builderAddress={proposal.builderAddress}
+        builderAddress={proposal.builderAddress as `0x${string}`}
         grantName={proposal.title}
         isGrant={isGrant}
         grantNumber={proposal.grantNumber}

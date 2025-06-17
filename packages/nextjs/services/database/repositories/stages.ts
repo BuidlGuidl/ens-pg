@@ -1,7 +1,7 @@
 import { Milestone } from "./milestones";
 import { InferInsertModel, InferSelectModel, and, eq } from "drizzle-orm";
 import { db } from "~~/services/database/config/postgresClient";
-import { grants, stages, stagesStatusEnum } from "~~/services/database/config/schema";
+import { grants, milestones, stages, stagesStatusEnum } from "~~/services/database/config/schema";
 
 export type StageInsert = InferInsertModel<typeof stages>;
 export type StageUpdate = Partial<StageInsert>;
@@ -54,4 +54,23 @@ export async function findStageByGrantNumberStageNumberAndBuilderAddress(
       ),
     )
     .limit(1);
+}
+
+export async function updateStageMilestonesGrantedAmounts(
+  stageId: number,
+  milestoneAmounts: { grantedAmount: bigint }[],
+): Promise<number[]> {
+  return await db.transaction(async tx => {
+    const milestoneIds = [];
+    for (let index = 0; index < milestoneAmounts.length; index++) {
+      const milestone = milestoneAmounts[index];
+      const [updatedMilestone] = await tx
+        .update(milestones)
+        .set({ grantedAmount: milestone.grantedAmount, status: "approved" })
+        .where(and(eq(milestones.stageId, stageId), eq(milestones.milestoneNumber, index + 1)))
+        .returning({ id: milestones.id });
+      milestoneIds.push(updatedMilestone.id);
+    }
+    return milestoneIds;
+  });
 }
