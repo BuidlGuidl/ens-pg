@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { parseEther } from "viem";
 import { applyFormSchema } from "~~/app/apply/schema";
 import { GrantInsertWithMilestones, createGrant } from "~~/services/database/repositories/grants";
 import { notifyTelegramBot } from "~~/services/notifications/telegram";
@@ -24,6 +25,10 @@ export async function POST(req: Request) {
     }
 
     const totalAmount = body.milestones.reduce((sum, milestone) => sum + BigInt(milestone.requestedAmount), 0n);
+
+    if (totalAmount > parseEther("2")) {
+      return NextResponse.json({ error: "Total requested funds should not exceed 2 ETH" }, { status: 400 });
+    }
 
     const result = await createGrant({
       ...body,

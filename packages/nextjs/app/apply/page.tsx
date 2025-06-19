@@ -162,10 +162,13 @@ const Apply: NextPage = () => {
                 <div className="pt-6">
                   <label className="text-xl font-bold">
                     Total requested funds:
-                    <span className="bg-light-purple ml-2 p-1 rounded">
+                    <span className={`bg-light-purple ml-2 p-1 rounded ${totalAmount > 2 ? "text-red-500" : ""}`}>
                       {isNaN(totalAmount) ? "-" : totalAmount.toLocaleString()} ETH
                     </span>
                   </label>
+                  {totalAmount > 2 && (
+                    <p className="mb-0 mt-1 text-red-500">Note: Total requested funds should not exceed 2 ETH.</p>
+                  )}
                 </div>
                 <Button
                   type="button"
@@ -206,7 +209,7 @@ const Apply: NextPage = () => {
                 Connect wallet
               </Button>
             ) : (
-              <Button type="submit" disabled={isPostingNewGrant} className="mt-4 self-center ">
+              <Button type="submit" disabled={isPostingNewGrant || totalAmount > 2} className="mt-4 self-center ">
                 {isPostingNewGrant && <span className="loading loading-spinner"></span>}
                 Submit
               </Button>
