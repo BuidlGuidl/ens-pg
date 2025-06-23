@@ -19,7 +19,7 @@ import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
  */
 export const RainbowKitCustomConnectButton = () => {
   const { targetNetwork } = useTargetNetwork();
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const router = useRouter();
   const { address: sessionAddress, isAuthenticated } = useAuthSession();
@@ -31,11 +31,11 @@ export const RainbowKitCustomConnectButton = () => {
   }, [router, isAuthenticated]);
 
   useEffect(() => {
-    if (isConnected && sessionAddress && sessionAddress !== address) {
-      signOut();
+    if (address && sessionAddress && sessionAddress !== address) {
       disconnect();
+      signOut({ redirect: true, callbackUrl: "/" });
     }
-  }, [address, disconnect, isConnected, sessionAddress]);
+  }, [address, disconnect, sessionAddress]);
 
   return (
     <ConnectButton.Custom>
