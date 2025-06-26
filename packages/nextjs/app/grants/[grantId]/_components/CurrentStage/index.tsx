@@ -49,12 +49,11 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
       </div>
       {(latestStage.status === "approved" || latestStage.status === "completed") && (
         <div className="bg-white px-4 sm:px-12 py-4 sm:py-10 mt-6 flex flex-col sm:flex-row gap-4 justify-between items-center rounded-xl">
-          {(contractGrantInfo && amountLeft === BigInt(0)) ||
-            (latestStage.status === "completed" && (
-              <Button onClick={() => newStageModalRef && newStageModalRef.current?.showModal()}>
-                Apply for new stage
-              </Button>
-            ))}
+          {((contractGrantInfo && amountLeft === BigInt(0)) || latestStage.status === "completed") && (
+            <Button onClick={() => newStageModalRef && newStageModalRef.current?.showModal()}>
+              Apply for new stage
+            </Button>
+          )}
 
           <GrantProgressBar
             className={`w-full ${
