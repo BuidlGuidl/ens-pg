@@ -18,6 +18,7 @@ export async function getAllGrants() {
         orderBy: [desc(stages.stageNumber)],
         with: {
           privateNotes: true,
+          milestones: true,
         },
       },
     },
