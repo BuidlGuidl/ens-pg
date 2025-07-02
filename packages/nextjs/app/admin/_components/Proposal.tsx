@@ -158,7 +158,8 @@ export const Proposal = ({ proposal, userSubmissionsAmount, isGrant }: ProposalP
 
       <div className="p-5">
         <div className="inline-block px-2 font-semibold bg-gray-100 rounded-sm">
-          Initial grant request: {formatEther(proposal.requestedFunds)} ETH
+          {latestStage.stageNumber > 1 ? "Stage grant request" : "Initial grant request"}:{" "}
+          {formatEther(latestStage.milestones.reduce((acc, curr) => acc + BigInt(curr.requestedAmount), 0n))} ETH
         </div>
 
         <div className="mt-2">
