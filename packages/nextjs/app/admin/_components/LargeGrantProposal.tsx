@@ -160,7 +160,8 @@ export const LargeGrantProposal = ({ proposal, userSubmissionsAmount, isGrant }:
 
       <div className="p-5">
         <div className="inline-block px-2 font-semibold bg-gray-100 rounded-sm">
-          Initial grant request: {totalAmount.toLocaleString()} USDC
+          {latestStage.stageNumber > 1 ? "Stage grant request" : "Initial grant request"}:{" "}
+          {totalAmount.toLocaleString()} USDC
         </div>
 
         <div className="mt-2">
