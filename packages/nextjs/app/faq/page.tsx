@@ -149,18 +149,38 @@ const FAQ: NextPage = () => {
           question: "Where can I learn more?",
           answer: (
             <div>
-              The best way to understand our ecosystem is to engage with it. Follow our updates on Twitter{" "}
-              <a
-                href="https://twitter.com/ens_dao"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                @ens_dao
-              </a>{" "}
-              and attend our weekly calls. You can also review previously funded projects on the platform to better
-              understand the types of initiatives we support. Remember, we&apos;re here to help you succeed in creating
-              valuable public goods for Web3.
+              <p>The best way to understand our ecosystem is to engage with it:</p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>
+                  Follow our updates on Twitter{" "}
+                  <a
+                    href="https://twitter.com/ens_dao"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    @ens_dao
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://discuss.ens.domains/t/ens-public-goods-weekly-meeting-12pm-et-5pm-utc-thursday-term-6/20065/56"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Attend our weekly working group calls
+                  </a>{" "}
+                  for more info on all Public Goods related topics
+                </li>
+                <li>
+                  You can also review previously funded projects on the platform to better understand the types of
+                  initiatives we support.
+                </li>
+              </ul>
+              <p className="mt-4">
+                Remember, we&apos;re here to help you succeed in creating valuable public goods for Web3.
+              </p>
             </div>
           ),
         },
