@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ExportGrantMarkdown } from "../../admin/_components/ExportGrantMarkdown";
 import { GrantMilestonesModal } from "./GrantMilestonesModal";
@@ -27,6 +27,9 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
 
   const [showMarkdown, setShowMarkdown] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
+  const [isDescriptionTruncated, setIsDescriptionTruncated] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement>(null);
 
   const latestStage =
     latestsShownStatus === "approved"
@@ -68,6 +71,12 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
     }
   };
 
+  useEffect(() => {
+    if (descriptionRef.current) {
+      setIsDescriptionTruncated(descriptionRef.current.scrollHeight > descriptionRef.current.clientHeight);
+    }
+  }, [grant.description]);
+
   return (
     <div className="card flex flex-col bg-white text-primary-content w-full max-w-96 shadow-lg rounded-lg overflow-hidden">
       <div className="px-3 py-3 flex justify-between items-center w-full">
@@ -101,7 +110,7 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
             <h2 className="text-2xl font-bold">{grant.title}</h2>
           )}
         </div>
-        <Address address={grant.builderAddress} />
+        <Address address={grant.builderAddress as `0x${string}`} />
       </div>
       <div className="px-5 py-4 w-full">
         <GrantProgressBar
@@ -111,7 +120,21 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
         />
       </div>
       <div className="px-5 pb-5 flex flex-col justify-between flex-grow">
-        <div className="text-gray-400 line-clamp-4">{multilineStringToTsx(grant.description)}</div>
+        <div
+          className={`text-gray-400 ${allWithdrawals.length > 0 ? "line-clamp-4" : "line-clamp-6"}`}
+          ref={descriptionRef}
+        >
+          {multilineStringToTsx(grant.description)}
+        </div>
+        {isDescriptionTruncated && (
+          <button
+            className="text-blue-500 hover:underline text-sm mt-1 self-end"
+            onClick={() => setShowDescriptionModal(true)}
+            type="button"
+          >
+            Read more
+          </button>
+        )}
         {allWithdrawals.length > 0 && (
           <Button
             className="mt-6"
@@ -139,6 +162,24 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {showDescriptionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-2xl w-full relative">
+            <h2 className="text-xl font-bold mb-4">Grant Description</h2>
+            <div className="max-h-96 overflow-y-auto text-gray-700 whitespace-pre-line">
+              {multilineStringToTsx(grant.description)}
+            </div>
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold"
+              onClick={() => setShowDescriptionModal(false)}
+              aria-label="Close"
+              type="button"
+            >
+              ×
+            </button>
           </div>
         </div>
       )}
