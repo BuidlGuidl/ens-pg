@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { GrantWithStages } from "../../page";
 import { MilestoneDetail } from "./MilestoneDetail";
 import { NewStageModal } from "./NewStageModal";
+import { LegacyWithdrawModal } from "./WithdrawModal/LegacyWithdrawModal";
 import { formatEther } from "viem";
 import { Badge } from "~~/components/pg-ens/Badge";
 import { Button } from "~~/components/pg-ens/Button";
@@ -40,6 +41,7 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
   const amountWithdrawn = cap - amountLeft;
 
   const newStageModalRef = useRef<HTMLDialogElement>(null);
+  const withdrawModalRef = useRef<HTMLDialogElement>(null);
 
   return (
     <div className="w-full max-w-5xl">
@@ -49,15 +51,24 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
       </div>
       {(latestStage.status === "approved" || latestStage.status === "completed") && (
         <div className="bg-white px-4 sm:px-12 py-4 sm:py-10 mt-6 flex flex-col sm:flex-row gap-4 justify-between items-center rounded-xl">
-          {((contractGrantInfo && amountLeft === BigInt(0)) || latestStage.status === "completed") && (
+          {(contractGrantInfo && amountLeft === BigInt(0)) || latestStage.status === "completed" ? (
             <Button onClick={() => newStageModalRef && newStageModalRef.current?.showModal()}>
               Apply for new stage
             </Button>
-          )}
+          ) : // Legacy withdraw button for stages with no milestones
+          latestStage.milestones.length === 0 ? (
+            <Button onClick={() => withdrawModalRef && withdrawModalRef.current?.showModal()}>
+              Withdraw milestone
+            </Button>
+          ) : null}
 
           <GrantProgressBar
             className={`w-full ${
-              (contractGrantInfo && amountLeft === BigInt(0)) || latestStage.status === "completed" ? "sm:w-1/2" : ""
+              (contractGrantInfo && amountLeft === BigInt(0)) ||
+              latestStage.status === "completed" ||
+              latestStage.milestones.length === 0
+                ? "sm:w-1/2"
+                : ""
             }`}
             amount={Number(formatEther(cap))}
             withdrawn={Number(formatEther(amountWithdrawn as unknown as bigint))}
@@ -66,16 +77,18 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
         </div>
       )}
 
-      {latestStage.milestones.map(milestone => (
-        <MilestoneDetail
-          milestone={milestone}
-          key={milestone.id}
-          contractGrantId={contractGrantId}
-          refetchContractInfo={async () => {
-            await Promise.all([refetchGrantInfo(), refetchUnlockedAmount()]);
-          }}
-        />
-      ))}
+      {/* Render milestones if present */}
+      {latestStage.milestones.length > 0 &&
+        latestStage.milestones.map(milestone => (
+          <MilestoneDetail
+            milestone={milestone}
+            key={milestone.id}
+            contractGrantId={contractGrantId}
+            refetchContractInfo={async () => {
+              await Promise.all([refetchGrantInfo(), refetchUnlockedAmount()]);
+            }}
+          />
+        ))}
 
       <NewStageModal
         ref={newStageModalRef}
@@ -83,6 +96,19 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
         grantId={grant.id}
         closeModal={() => newStageModalRef.current?.close()}
       />
+
+      {/* Legacy WithdrawModal for stages with no milestones */}
+      {latestStage.milestones.length === 0 && (
+        <LegacyWithdrawModal
+          ref={withdrawModalRef}
+          stage={latestStage}
+          closeModal={() => withdrawModalRef.current?.close()}
+          contractGrantId={contractGrantId}
+          refetchContractInfo={async () => {
+            await Promise.all([refetchGrantInfo(), refetchUnlockedAmount()]);
+          }}
+        />
+      )}
     </div>
   );
 };

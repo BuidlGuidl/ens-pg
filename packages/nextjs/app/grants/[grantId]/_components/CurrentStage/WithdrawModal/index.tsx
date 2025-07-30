@@ -106,15 +106,15 @@ export const WithdrawModal = forwardRef<HTMLDialogElement, WithdrawModalProps>(
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col space-y-1 mt-4">
               <div className="text-xl">
                 <span className="font-bold">Description:</span>
-                <p className="mt-1">{multilineStringToTsx(milestone.description)}</p>
+                <div className="mt-1">{multilineStringToTsx(milestone.description)}</div>
               </div>
               <div className="text-xl">
                 <span className="font-bold">Amount:</span>
-                <p className="mt-1">{formatEther(milestone.grantedAmount || 0n)} ETH</p>
+                <div className="mt-1">{formatEther(milestone.grantedAmount || 0n)} ETH</div>
               </div>
               <div>
                 <span className="text-xl font-bold">Detail of Deliverables:</span>
-                <p className="text-lg mt-1">{multilineStringToTsx(milestone.proposedDeliverables)}</p>
+                <div className="text-lg mt-1">{multilineStringToTsx(milestone.proposedDeliverables)}</div>
               </div>
               <div className="flex flex-col">
                 <FormTextarea label="Proof of completion" showMessageLength {...getCommonOptions("completionProof")} />
