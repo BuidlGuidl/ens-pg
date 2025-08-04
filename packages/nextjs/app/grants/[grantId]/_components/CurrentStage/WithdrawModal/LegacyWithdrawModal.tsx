@@ -13,7 +13,6 @@ import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { Stage } from "~~/services/database/repositories/stages";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
 
-// Props for legacy modal
 export type LegacyWithdrawModalProps = {
   stage: Stage;
   closeModal: () => void;

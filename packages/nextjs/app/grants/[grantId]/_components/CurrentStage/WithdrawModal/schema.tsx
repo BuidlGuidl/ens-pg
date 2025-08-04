@@ -7,7 +7,6 @@ export const withdrawModalFormSchema = z.object({
 
 export type WithdrawModalFormValues = z.infer<typeof withdrawModalFormSchema>;
 
-// Legacy schema for legacy WithdrawModal
 export const legacyWithdrawModalFormSchema = z.object({
   withdrawAmount: z.string().min(1, { message: "Amount is required" }),
   completedMilestones: z

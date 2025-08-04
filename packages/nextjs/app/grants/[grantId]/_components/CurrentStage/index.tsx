@@ -77,7 +77,6 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
         </div>
       )}
 
-      {/* Render milestones if present */}
       {latestStage.milestones.length > 0 &&
         latestStage.milestones.map(milestone => (
           <MilestoneDetail
@@ -97,7 +96,6 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
         closeModal={() => newStageModalRef.current?.close()}
       />
 
-      {/* Legacy WithdrawModal for stages with no milestones */}
       {latestStage.milestones.length === 0 && (
         <LegacyWithdrawModal
           ref={withdrawModalRef}
