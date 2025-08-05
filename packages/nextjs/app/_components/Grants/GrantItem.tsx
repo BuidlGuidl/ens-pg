@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ExportGrantMarkdown } from "../../admin/_components/ExportGrantMarkdown";
+import { GrantDescriptionModal } from "./GrantDescriptionModal";
 import { GrantMilestonesModal } from "./GrantMilestonesModal";
 import { formatEther } from "viem";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
@@ -23,11 +24,11 @@ type GrantItemProps = {
 
 export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
   const milestonesRef = useRef<HTMLDialogElement>(null);
+  const descriptionModalRef = useRef<HTMLDialogElement>(null);
   const { isAdmin } = useAuthSession();
 
   const [showMarkdown, setShowMarkdown] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [isDescriptionTruncated, setIsDescriptionTruncated] = useState(false);
   const descriptionRef = useRef<HTMLDivElement>(null);
 
@@ -128,8 +129,8 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
         </div>
         {isDescriptionTruncated && (
           <button
-            className="text-blue-500 hover:underline text-sm mt-1 self-end"
-            onClick={() => setShowDescriptionModal(true)}
+            className="text-primary hover:underline text-sm mt-1 self-end"
+            onClick={() => descriptionModalRef && descriptionModalRef.current?.showModal()}
             type="button"
           >
             Read more
@@ -165,24 +166,7 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
           </div>
         </div>
       )}
-      {showDescriptionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-2xl w-full relative">
-            <h2 className="text-xl font-bold mb-4">Grant Description</h2>
-            <div className="max-h-96 overflow-y-auto text-gray-700 whitespace-pre-line">
-              {multilineStringToTsx(grant.description)}
-            </div>
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold"
-              onClick={() => setShowDescriptionModal(false)}
-              aria-label="Close"
-              type="button"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
+      <GrantDescriptionModal ref={descriptionModalRef} description={grant.description} id={grant.id} />
     </div>
   );
 };
