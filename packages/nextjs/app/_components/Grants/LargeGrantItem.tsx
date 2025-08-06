@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ExportLargeGrantMarkdown } from "../../admin/_components/ExportLargeGrantMarkdown";
+import { GrantDescriptionModal } from "./GrantDescriptionModal";
 import { LargeGrantMilestonesModal } from "./LargeGrantMilestonesModal";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { Badge } from "~~/components/pg-ens/Badge";
@@ -22,9 +23,12 @@ type GrantItemProps = {
 
 export const LargeGrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
   const milestonesRef = useRef<HTMLDialogElement>(null);
+  const descriptionModalRef = useRef<HTMLDialogElement>(null);
   const { isAdmin } = useAuthSession();
   const [showMarkdown, setShowMarkdown] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isDescriptionTruncated, setIsDescriptionTruncated] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement>(null);
 
   const latestStage =
     latestsShownStatus === "approved"
@@ -51,6 +55,12 @@ export const LargeGrantItem = ({ grant, latestsShownStatus }: GrantItemProps) =>
 
   // Only generate markdown if grant is an AdminLargeGrant
   const markdown = "email" in grant ? ExportLargeGrantMarkdown({ grant }) : "";
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      setIsDescriptionTruncated(descriptionRef.current.scrollHeight > descriptionRef.current.clientHeight);
+    }
+  }, [grant.description]);
 
   const handleCopy = async () => {
     try {
@@ -107,7 +117,21 @@ export const LargeGrantItem = ({ grant, latestsShownStatus }: GrantItemProps) =>
         />
       </div>
       <div className="px-5 pb-5 flex flex-col justify-between flex-grow">
-        <div className="text-gray-400 line-clamp-4">{multilineStringToTsx(grant.description)}</div>
+        <div
+          className={`text-gray-400 ${completedMilestones.length > 0 ? "line-clamp-4" : "line-clamp-6"}`}
+          ref={descriptionRef}
+        >
+          {multilineStringToTsx(grant.description)}
+        </div>
+        {isDescriptionTruncated && (
+          <button
+            className="text-primary hover:underline text-sm mt-1 self-end"
+            onClick={() => descriptionModalRef && descriptionModalRef.current?.showModal()}
+            type="button"
+          >
+            Read more
+          </button>
+        )}
         {completedMilestones.length > 0 && (
           <Button
             className="mt-6"
@@ -142,6 +166,7 @@ export const LargeGrantItem = ({ grant, latestsShownStatus }: GrantItemProps) =>
           </div>
         </div>
       )}
+      <GrantDescriptionModal ref={descriptionModalRef} description={grant.description} id={grant.id} />
     </div>
   );
 };
