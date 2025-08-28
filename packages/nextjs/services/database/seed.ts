@@ -8,6 +8,7 @@ import {
   largePrivateNotes,
   largeRejectVotes,
   largeStages,
+  milestones,
   privateNotes,
   rejectVotes,
   stages,
@@ -34,6 +35,7 @@ async function seed() {
   await db.delete(privateNotes).execute(); // Delete private notes first
   await db.delete(approvalVotes).execute();
   await db.delete(rejectVotes).execute();
+  await db.delete(milestones).execute(); // Ensure milestones are deleted before stages
   await db.delete(stages).execute(); // Ensure stages are deleted before grants
   await db.delete(grants).execute(); // Delete grants
 
@@ -109,7 +111,7 @@ async function seed() {
     .returning({ id: grants.id })
     .execute();
 
-  await db
+  const insertedStages = await db
     .insert(stages)
     .values([
       {
@@ -119,7 +121,7 @@ async function seed() {
         status: "completed",
       },
       {
-        milestone: "Milesotne of stage 2 for Grant 1",
+        milestone: "Milestone of stage 2 for Grant 1",
         stageNumber: 2,
         grantId: insertedGrants[0].id,
       },
@@ -127,11 +129,111 @@ async function seed() {
         milestone: "Milestone of stage 1 for Grant 2",
         stageNumber: 1,
         grantId: insertedGrants[1].id,
+        status: "approved",
       },
       {
         milestone: "Milestone of stage 1 for Grant 3",
         stageNumber: 1,
         grantId: insertedGrants[2].id,
+      },
+    ])
+    .returning({ id: stages.id })
+    .execute();
+
+  await db
+    .insert(milestones)
+    .values([
+      {
+        description: "Milestone 1 - Stage 1 - Grant 1",
+        milestoneNumber: 1,
+        stageId: insertedStages[0].id,
+        status: "paid",
+        requestedAmount: parseEther("1"),
+        grantedAmount: parseEther("0.5"),
+        proposedDeliverables: "Deliverables 1",
+        completedAt: new Date("2025-01-02"),
+        completionProof: "Proof 1",
+        paymentTx: "0xb7c61529aa31e3703ee9a9c54237cc1693531b95675152671a7cc4bcf92b0fcd",
+      },
+      {
+        description: "Milestone 2 - Stage 1 - Grant 1",
+        milestoneNumber: 2,
+        stageId: insertedStages[0].id,
+        status: "paid",
+        requestedAmount: parseEther("0.5"),
+        grantedAmount: parseEther("0.5"),
+        proposedDeliverables: "Deliverables 2",
+        completedAt: new Date("2025-01-02"),
+        completionProof: "Proof 2",
+        paymentTx: "0xb7c61529aa31e3703ee9a9c54237cc1693531b95675152671a7cc4bcf92b0fcd",
+      },
+      {
+        description: "Milestone 3 - Stage 1 - Grant 1",
+        milestoneNumber: 3,
+        stageId: insertedStages[0].id,
+        status: "paid",
+        requestedAmount: parseEther("0.5"),
+        grantedAmount: parseEther("0.5"),
+        proposedDeliverables: "Deliverables 3",
+        completedAt: new Date("2025-01-02"),
+        completionProof: "Proof 3",
+        paymentTx: "0xb7c61529aa31e3703ee9a9c54237cc1693531b95675152671a7cc4bcf92b0fcd",
+      },
+      {
+        description: "Milestone 1 - Stage 2 - Grant 1",
+        milestoneNumber: 1,
+        stageId: insertedStages[1].id,
+        status: "proposed",
+        requestedAmount: parseEther("0.5"),
+        proposedDeliverables: "Deliverables 3b",
+      },
+      {
+        description: "Milestone 2 - Stage 2 - Grant 1",
+        milestoneNumber: 2,
+        stageId: insertedStages[1].id,
+        status: "proposed",
+        requestedAmount: parseEther("1"),
+        proposedDeliverables: "Deliverables 3b",
+      },
+      {
+        description: "Milestone 1 - Stage 1 - Grant 2",
+        milestoneNumber: 1,
+        stageId: insertedStages[2].id,
+        status: "approved",
+        requestedAmount: parseEther("0.25"),
+        proposedDeliverables: "Deliverables 4",
+        completedAt: new Date(),
+        completionProof: "Proof 4",
+      },
+      {
+        description: "Milestone 2 - Stage 1 - Grant 2",
+        milestoneNumber: 2,
+        stageId: insertedStages[2].id,
+        status: "approved",
+        requestedAmount: parseEther("0.25"),
+        proposedDeliverables: "Deliverables 5",
+        completedAt: new Date(),
+        completionProof: "Proof 5",
+      },
+      {
+        description: "Milestone 1 - Stage 1 - Grant 3",
+        milestoneNumber: 1,
+        stageId: insertedStages[3].id,
+        status: "proposed",
+        requestedAmount: parseEther("0.5"),
+        proposedDeliverables: "Deliverables 6",
+        completedAt: new Date(),
+        completionProof: "Proof 6",
+      },
+      {
+        description: "Milestone 2 - Stage 1 - Grant 3",
+        milestoneNumber: 2,
+        stageId: insertedStages[3].id,
+        status: "proposed",
+        requestedAmount: parseEther("0.5"),
+        proposedDeliverables: "Deliverables 5",
+        completedAt: new Date(),
+        completionProof: "Proof 5",
       },
     ])
     .execute();

@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { parseEther, recoverTypedDataAddress } from "viem";
 import { createApprovalVote } from "~~/services/database/repositories/approval-votes";
-import { StageUpdate, getStageByIdWithGrantAndVotes, updateStage } from "~~/services/database/repositories/stages";
+import {
+  StageUpdate,
+  getStageByIdWithGrantAndVotes,
+  updateStage,
+  updateStageMilestonesGrantedAmounts,
+} from "~~/services/database/repositories/stages";
 import { MINIMAL_VOTES_FOR_FINAL_APPROVAL } from "~~/utils/approval-votes";
 import { authOptions } from "~~/utils/auth";
 import { EIP_712_DOMAIN, EIP_712_TYPES__REVIEW_STAGE } from "~~/utils/eip712";
@@ -14,6 +19,7 @@ export type ReviewStageBody = {
   grantAmount?: string;
   signature: `0x${string}`;
   grantNumber?: string;
+  milestones?: { grantedAmount: string }[];
 };
 
 export async function POST(req: NextRequest, { params }: { params: { stageId: string } }) {
@@ -76,6 +82,13 @@ export async function POST(req: NextRequest, { params }: { params: { stageId: st
         amount: parseEther(body.grantAmount as string),
         authorAddress: session.user.address,
       });
+      // we need to update the stage milestones with the granted amounts
+      if (body.milestones && body.milestones.length > 0) {
+        const updatedMilestones = body.milestones.map(milestone => ({
+          grantedAmount: parseEther(milestone.grantedAmount),
+        }));
+        await updateStageMilestonesGrantedAmounts(Number(stageId), updatedMilestones);
+      }
     }
 
     await updateStage(Number(stageId), {

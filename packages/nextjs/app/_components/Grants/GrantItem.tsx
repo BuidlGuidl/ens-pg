@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ExportGrantMarkdown } from "../../admin/_components/ExportGrantMarkdown";
+import { GrantDescriptionModal } from "./GrantDescriptionModal";
 import { GrantMilestonesModal } from "./GrantMilestonesModal";
 import { formatEther } from "viem";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
@@ -23,10 +24,13 @@ type GrantItemProps = {
 
 export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
   const milestonesRef = useRef<HTMLDialogElement>(null);
+  const descriptionModalRef = useRef<HTMLDialogElement>(null);
   const { isAdmin } = useAuthSession();
 
   const [showMarkdown, setShowMarkdown] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isDescriptionTruncated, setIsDescriptionTruncated] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement>(null);
 
   const latestStage =
     latestsShownStatus === "approved"
@@ -68,6 +72,12 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
     }
   };
 
+  useEffect(() => {
+    if (descriptionRef.current) {
+      setIsDescriptionTruncated(descriptionRef.current.scrollHeight > descriptionRef.current.clientHeight);
+    }
+  }, [grant.description]);
+
   return (
     <div className="card flex flex-col bg-white text-primary-content w-full max-w-96 shadow-lg rounded-lg overflow-hidden">
       <div className="px-3 py-3 flex justify-between items-center w-full">
@@ -101,7 +111,7 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
             <h2 className="text-2xl font-bold">{grant.title}</h2>
           )}
         </div>
-        <Address address={grant.builderAddress} />
+        <Address address={grant.builderAddress as `0x${string}`} />
       </div>
       <div className="px-5 py-4 w-full">
         <GrantProgressBar
@@ -111,7 +121,21 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
         />
       </div>
       <div className="px-5 pb-5 flex flex-col justify-between flex-grow">
-        <div className="text-gray-400 line-clamp-4">{multilineStringToTsx(grant.description)}</div>
+        <div
+          className={`text-gray-400 ${allWithdrawals.length > 0 ? "line-clamp-4" : "line-clamp-6"}`}
+          ref={descriptionRef}
+        >
+          {multilineStringToTsx(grant.description)}
+        </div>
+        {isDescriptionTruncated && (
+          <button
+            className="text-primary hover:underline text-sm mt-1 self-end"
+            onClick={() => descriptionModalRef && descriptionModalRef.current?.showModal()}
+            type="button"
+          >
+            Read more
+          </button>
+        )}
         {allWithdrawals.length > 0 && (
           <Button
             className="mt-6"
@@ -142,6 +166,7 @@ export const GrantItem = ({ grant, latestsShownStatus }: GrantItemProps) => {
           </div>
         </div>
       )}
+      <GrantDescriptionModal ref={descriptionModalRef} description={grant.description} id={grant.id} />
     </div>
   );
 };

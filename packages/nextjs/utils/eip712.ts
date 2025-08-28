@@ -6,7 +6,7 @@ export const EIP_712_DOMAIN = {
 export const EIP_712_TYPES__APPLY_FOR_STAGE = {
   Message: [
     { name: "stage_number", type: "string" },
-    { name: "milestone", type: "string" },
+    { name: "milestones", type: "string" },
   ],
 } as const;
 
@@ -34,10 +34,7 @@ export const EIP_712_TYPES__STAGE_PRIVATE_NOTE = {
 } as const;
 
 export const EIP_712_TYPES__STAGE_APPROVAL_VOTE = {
-  Message: [
-    { name: "grantAmount", type: "string" },
-    { name: "stageId", type: "string" },
-  ],
+  Message: [{ name: "stageId", type: "string" }],
 } as const;
 
 export const EIP_712_TYPES__STAGE_REJECT_VOTE = {

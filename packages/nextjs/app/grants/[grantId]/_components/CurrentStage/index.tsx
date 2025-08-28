@@ -2,8 +2,9 @@
 
 import { useRef } from "react";
 import { GrantWithStages } from "../../page";
+import { MilestoneDetail } from "./MilestoneDetail";
 import { NewStageModal } from "./NewStageModal";
-import { WithdrawModal } from "./WithdrawModal";
+import { LegacyWithdrawModal } from "./WithdrawModal/LegacyWithdrawModal";
 import { formatEther } from "viem";
 import { Badge } from "~~/components/pg-ens/Badge";
 import { Button } from "~~/components/pg-ens/Button";
@@ -24,27 +25,17 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
     args: [grant.builderAddress, BigInt(grant.grantNumber)],
   });
 
-  const {
-    data: contractGrantInfo,
-    isLoading: isBuilderInfoLoading,
-    refetch: refetchGrantInfo,
-  } = useScaffoldReadContract({
+  const { data: contractGrantInfo, refetch: refetchGrantInfo } = useScaffoldReadContract({
     contractName: "Stream",
     functionName: "grantStreams",
     args: [contractGrantId],
   });
 
-  const {
-    data: unlockedAmount,
-    isLoading: isUnlockedAmountLoading,
-    refetch: refetchUnlockedAmount,
-  } = useScaffoldReadContract({
+  const { data: unlockedAmount, refetch: refetchUnlockedAmount } = useScaffoldReadContract({
     contractName: "Stream",
     functionName: "unlockedGrantAmount",
     args: [contractGrantId],
   });
-
-  const isBtnLoading = isBuilderInfoLoading || isUnlockedAmountLoading;
 
   const [cap = BigInt(0), , amountLeft = BigInt(0)] = contractGrantInfo ?? [];
   const amountWithdrawn = cap - amountLeft;
@@ -64,20 +55,39 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
             <Button onClick={() => newStageModalRef && newStageModalRef.current?.showModal()}>
               Apply for new stage
             </Button>
-          ) : (
-            <Button disabled={isBtnLoading} onClick={() => withdrawModalRef && withdrawModalRef.current?.showModal()}>
+          ) : // Legacy withdraw button for stages with no milestones
+          latestStage.milestones.length === 0 ? (
+            <Button onClick={() => withdrawModalRef && withdrawModalRef.current?.showModal()}>
               Withdraw milestone
             </Button>
-          )}
+          ) : null}
 
           <GrantProgressBar
-            className="w-full sm:w-1/2"
+            className={`w-full ${
+              (contractGrantInfo && amountLeft === BigInt(0)) ||
+              latestStage.status === "completed" ||
+              latestStage.milestones.length === 0
+                ? "sm:w-1/2"
+                : ""
+            }`}
             amount={Number(formatEther(cap))}
             withdrawn={Number(formatEther(amountWithdrawn as unknown as bigint))}
             available={Number(formatEther(unlockedAmount ?? BigInt(0)))}
           />
         </div>
       )}
+
+      {latestStage.milestones.length > 0 &&
+        latestStage.milestones.map(milestone => (
+          <MilestoneDetail
+            milestone={milestone}
+            key={milestone.id}
+            contractGrantId={contractGrantId}
+            refetchContractInfo={async () => {
+              await Promise.all([refetchGrantInfo(), refetchUnlockedAmount()]);
+            }}
+          />
+        ))}
 
       <NewStageModal
         ref={newStageModalRef}
@@ -86,15 +96,17 @@ export const CurrentStage = ({ grant }: CurrentStageProps) => {
         closeModal={() => newStageModalRef.current?.close()}
       />
 
-      <WithdrawModal
-        ref={withdrawModalRef}
-        stage={latestStage}
-        closeModal={() => withdrawModalRef.current?.close()}
-        contractGrantId={contractGrantId}
-        refetchContractInfo={async () => {
-          await Promise.all([refetchGrantInfo(), refetchUnlockedAmount()]);
-        }}
-      />
+      {latestStage.milestones.length === 0 && (
+        <LegacyWithdrawModal
+          ref={withdrawModalRef}
+          stage={latestStage}
+          closeModal={() => withdrawModalRef.current?.close()}
+          contractGrantId={contractGrantId}
+          refetchContractInfo={async () => {
+            await Promise.all([refetchGrantInfo(), refetchUnlockedAmount()]);
+          }}
+        />
+      )}
     </div>
   );
 };

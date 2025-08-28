@@ -2,14 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { parseEther } from "viem";
 import { applyFormSchema } from "~~/app/apply/schema";
-import { GrantInsert, createGrant } from "~~/services/database/repositories/grants";
-import { createStage } from "~~/services/database/repositories/stages";
+import { GrantInsertWithMilestones, createGrant } from "~~/services/database/repositories/grants";
 import { notifyTelegramBot } from "~~/services/notifications/telegram";
 import { authOptions } from "~~/utils/auth";
 
-export type CreateNewGrantReqBody = Omit<GrantInsert, "requestedFunds" | "builderAddress"> & {
-  requestedFunds: string;
-};
+export type CreateNewGrantReqBody = Omit<GrantInsertWithMilestones, "builderAddress" | "requestedFunds">;
 
 export async function POST(req: Request) {
   try {
@@ -27,23 +24,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid form details submitted" }, { status: 400 });
     }
 
-    const [createdGrant] = await createGrant({
+    const totalAmount = body.milestones.reduce((sum, milestone) => sum + BigInt(milestone.requestedAmount), 0n);
+
+    if (totalAmount > parseEther("2")) {
+      return NextResponse.json({ error: "Total requested funds should not exceed 2 ETH" }, { status: 400 });
+    }
+
+    const result = await createGrant({
       ...body,
       builderAddress,
-      requestedFunds: parseEther(body.requestedFunds),
-    });
-
-    const [createdStage] = await createStage({
-      grantId: createdGrant.id,
+      requestedFunds: totalAmount,
     });
 
     await notifyTelegramBot("grant", {
-      id: createdGrant.id,
+      id: result.grantId,
       ...body,
       builderAddress,
     });
 
-    return NextResponse.json({ grantId: createdGrant.id, stageId: createdStage.id }, { status: 201 });
+    return NextResponse.json({ grantId: result.grantId, stageId: result.stageId }, { status: 201 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Error creating grant" }, { status: 500 });

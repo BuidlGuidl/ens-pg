@@ -1,0 +1,1 @@
+ALTER TABLE "milestones" DROP COLUMN IF EXISTS "paid_at";

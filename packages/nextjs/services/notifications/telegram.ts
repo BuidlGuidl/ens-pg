@@ -1,5 +1,6 @@
 import { getLargeGrantById } from "../database/repositories/large-grants";
-import { getMilestoneByIdWithRelatedData } from "../database/repositories/large-milestones";
+import { getMilestoneByIdWithRelatedData as getLargeMilestoneByIdWithRelatedData } from "../database/repositories/large-milestones";
+import { getMilestoneByIdWithRelatedData } from "../database/repositories/milestones";
 import { CreateNewGrantReqBody } from "~~/app/api/grants/new/route";
 import { CreateNewLargeGrantReqBody } from "~~/app/api/large-grants/new/route";
 import { CreateNewLargeStageReqBody } from "~~/app/api/large-stages/new/route";
@@ -10,6 +11,7 @@ const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL;
 const TELEGRAM_WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 
 export type LargeGrantDataFromDB = Awaited<ReturnType<typeof getLargeGrantById>>;
+export type LargeMilestoneDataFromDB = Awaited<ReturnType<typeof getLargeMilestoneByIdWithRelatedData>>;
 export type MilestoneDataFromDB = Awaited<ReturnType<typeof getMilestoneByIdWithRelatedData>>;
 
 type StageData = {
@@ -17,16 +19,16 @@ type StageData = {
   newLargeStage?: CreateNewLargeStageReqBody;
   grant?: GrantWithStages;
   largeGrant?: CreateNewLargeGrantReqBody | LargeGrantDataFromDB;
-  largeMilestone?: MilestoneDataFromDB;
+  largeMilestone?: LargeMilestoneDataFromDB;
+  milestone?: MilestoneDataFromDB;
 };
 
 type GrantData = CreateNewGrantReqBody & { builderAddress: string };
 type LargeGrantData = CreateNewLargeGrantReqBody & { builderAddress: string };
 
-export async function notifyTelegramBot<T extends "grant" | "stage" | "largeGrant" | "largeStage" | "largeMilestone">(
-  endpoint: T,
-  data: T extends "grant" ? GrantData : T extends "largeGrant" ? LargeGrantData : StageData,
-) {
+export async function notifyTelegramBot<
+  T extends "grant" | "stage" | "largeGrant" | "largeStage" | "largeMilestone" | "milestone",
+>(endpoint: T, data: T extends "grant" ? GrantData : T extends "largeGrant" ? LargeGrantData : StageData) {
   if (!TELEGRAM_BOT_URL || !TELEGRAM_WEBHOOK_SECRET) {
     if (!TELEGRAM_BOT_URL) {
       console.warn("TELEGRAM_BOT_URL is not set. Telegram notifications will be disabled.");

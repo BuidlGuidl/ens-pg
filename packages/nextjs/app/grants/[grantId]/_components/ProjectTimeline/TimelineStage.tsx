@@ -1,15 +1,17 @@
 import { MockStage } from ".";
 import { formatEther } from "viem";
+import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import { ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleSolidIcon } from "@heroicons/react/24/solid";
+import { statusText } from "~~/components/pg-ens/BadgeMilestone";
 import { StyledTooltip } from "~~/components/pg-ens/StyledTooltip";
 import { useWithdrawals } from "~~/hooks/pg-ens/useWithdrawals";
 import { Grant } from "~~/services/database/repositories/grants";
-import { Stage } from "~~/services/database/repositories/stages";
+import { StageWithMilestones } from "~~/services/database/repositories/stages";
 import { getFormattedDate } from "~~/utils/getFormattedDate";
 import { multilineStringToTsx } from "~~/utils/multiline-string-to-tsx";
 
-type TimelineStageProps = { stage: Stage | MockStage; grant: Grant };
+type TimelineStageProps = { stage: StageWithMilestones | MockStage; grant: Grant };
 
 export const TimelineStage = ({ stage, grant }: TimelineStageProps) => {
   const { builderAddress, grantNumber } = grant;
@@ -83,15 +85,44 @@ export const TimelineStage = ({ stage, grant }: TimelineStageProps) => {
               </div>
             )}
 
-            {withdrawals.map((withdrawal, idx) => (
-              <div key={`withdrawal-${withdrawal.id}`} className="mt-3 text-gray-500">
-                <div className="font-bold text-lg">
-                  Milestone {idx + 1} ({formatEther(BigInt(withdrawal.amount))} Eth withdraw)
-                </div>
-
-                {multilineStringToTsx(withdrawal.reason || "-")}
+            {stage.milestones ? (
+              <div className="mt-4">
+                {stage.milestones.map((milestone, idx) => (
+                  <div key={`milestone-${milestone.id}`} className="mt-2">
+                    <div className={`text-lg font-bold flex ${isOdd ? "" : "sm:place-content-end"}`}>
+                      Milestone {idx + 1} (
+                      {milestone.grantedAmount
+                        ? formatEther(milestone.grantedAmount)
+                        : formatEther(milestone.requestedAmount)}{" "}
+                      ETH)
+                      {["paid"].includes(milestone.status) && (
+                        <CheckCircleSolidIcon
+                          className="ml-1 mt-1 h-6 w-6 text-primary-green"
+                          title={statusText[milestone.status as keyof typeof statusText]}
+                        />
+                      )}
+                      {milestone.status === "rejected" && (
+                        <ExclamationCircleIcon
+                          className="ml-1 mt-1 h-6 w-6 text-primary-red"
+                          title={statusText[milestone.status as keyof typeof statusText]}
+                        />
+                      )}
+                    </div>
+                    <div className="text-sm">{milestone.description}</div>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              withdrawals.map((withdrawal, idx) => (
+                <div key={`withdrawal-${withdrawal.id}`} className="mt-3 text-gray-500">
+                  <div className="font-bold text-lg">
+                    Milestone {idx + 1} ({formatEther(BigInt(withdrawal.amount))} Eth withdraw)
+                  </div>
+
+                  {multilineStringToTsx(withdrawal.reason || "-")}
+                </div>
+              ))
+            )}
           </>
         ) : (
           <div className="font-bold text-2xl -mt-1.5 text-gray-500">Stage {stage.stageNumber} (locked)</div>

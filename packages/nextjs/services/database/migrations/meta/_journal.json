@@ -29,6 +29,27 @@
       "when": 1749151557717,
       "tag": "0003_opposite_lord_tyger",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749590891068,
+      "tag": "0004_giant_blade",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1749750852086,
+      "tag": "0005_charming_wendigo",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1750356203342,
+      "tag": "0006_known_wrecker",
+      "breakpoints": true
     }
   ]
 }

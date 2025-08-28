@@ -1,11 +1,11 @@
 import { forwardRef, useState } from "react";
 import { GrantWithStagesAndPrivateNotes } from "../Proposal";
 import { FinalApproveModalFormValues, finalApproveModalFormSchema } from "./schema";
-import { FormProvider } from "react-hook-form";
+import { FormProvider, useFieldArray } from "react-hook-form";
 import { Toaster } from "react-hot-toast";
 import { formatEther, parseEther } from "viem";
 import { Button } from "~~/components/pg-ens/Button";
-import { FormInput } from "~~/components/pg-ens/form-fields/FormInput";
+import { FormSelect } from "~~/components/pg-ens/form-fields/FormSelect";
 import { FormTextarea } from "~~/components/pg-ens/form-fields/FormTextarea";
 import { Address } from "~~/components/scaffold-eth";
 import { useFormMethods } from "~~/hooks/pg-ens/useFormMethods";
@@ -41,7 +41,7 @@ export const FinalApproveModal = forwardRef<
   {
     stage: GrantWithStagesAndPrivateNotes["stages"][number];
     grantName: string;
-    builderAddress: string;
+    builderAddress: `0x${string}`;
     isGrant?: boolean;
     grantNumber: number;
   }
@@ -50,11 +50,17 @@ export const FinalApproveModal = forwardRef<
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(LOADING_STATUS_MAP.Empty);
   const { approvalVotes } = stage;
 
-  const { getCommonOptions, formMethods } = useFormMethods<FinalApproveModalFormValues>({
+  const { formMethods, getCommonOptions } = useFormMethods<FinalApproveModalFormValues>({
     schema: finalApproveModalFormSchema,
+    defaultValues: {
+      milestones: stage.milestones.map(milestone => ({
+        grantedAmount: formatEther(milestone.requestedAmount),
+      })),
+      statusNote: "",
+    },
   });
 
-  const { handleSubmit } = formMethods;
+  const { handleSubmit, control, watch } = formMethods;
 
   const { writeContractAsync, isPending: isWriteContractPending } = useScaffoldWriteContract("Stream");
 
@@ -68,7 +74,15 @@ export const FinalApproveModal = forwardRef<
     },
   });
 
-  const handleSetupStream = async (fieldValues: FinalApproveModalFormValues) => {
+  const { fields } = useFieldArray({
+    control,
+    name: "milestones",
+  });
+
+  const watchMilestones = watch("milestones");
+  const totalAmount = watchMilestones.reduce((acc, curr) => acc + Number(curr.grantedAmount), 0);
+
+  const handleSetupStream = async () => {
     try {
       let txHash;
 
@@ -76,7 +90,7 @@ export const FinalApproveModal = forwardRef<
         setLoadingStatus(LOADING_STATUS_MAP.CreatingStream);
         txHash = await writeContractAsync({
           functionName: "addGrantStream",
-          args: [builderAddress, parseEther(fieldValues.grantAmount), grantNumber],
+          args: [builderAddress, parseEther(totalAmount.toString()), grantNumber],
         });
       } else {
         if (!contractGrantIdForBuilder) {
@@ -88,7 +102,7 @@ export const FinalApproveModal = forwardRef<
 
         txHash = await writeContractAsync({
           functionName: "moveGrantToNextStage",
-          args: [contractGrantIdForBuilder, parseEther(fieldValues.grantAmount)],
+          args: [contractGrantIdForBuilder, parseEther(totalAmount.toString())],
         });
       }
 
@@ -99,13 +113,19 @@ export const FinalApproveModal = forwardRef<
   };
 
   const onSubmit = async (fieldValues: FinalApproveModalFormValues) => {
-    const txHash = await handleSetupStream(fieldValues);
+    const txHash = await handleSetupStream();
     if (!txHash) {
       setLoadingStatus(LOADING_STATUS_MAP.Empty);
       return notification.error("Error setting up stream");
     }
     setLoadingStatus(LOADING_STATUS_MAP.Approving);
-    await reviewStage({ status: "approved", ...fieldValues, txHash, grantNumber: grantNumber.toString() });
+    await reviewStage({
+      status: "approved",
+      ...fieldValues,
+      txHash,
+      grantNumber: grantNumber.toString(),
+      grantAmount: totalAmount.toString(),
+    });
     setLoadingStatus(LOADING_STATUS_MAP.Empty);
   };
 
@@ -133,17 +153,40 @@ export const FinalApproveModal = forwardRef<
               {approvalVotes.map(approvalVote => (
                 <div key={approvalVote.id} className="flex items-center gap-2">
                   <Address address={approvalVote.authorAddress} />
-                  <span>({formatEther(approvalVote.amount)} ETH suggested)</span>
+                  {approvalVote.amount && <span>({formatEther(approvalVote.amount)} ETH suggested)</span>}
                 </div>
               ))}
               <div className="divider" />
             </>
           )}
           <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-1">
-            <FormInput
-              label={`Grant amount for stage ${stage.stageNumber} (in ETH)`}
-              {...getCommonOptions("grantAmount")}
-            />
+            <h3 className="text-2xl font-bold">Planned Milestones</h3>
+            <div className="rounded-xl bg-light-purple p-4 mb-2">
+              {fields.map((field, index) => (
+                <div key={field.id}>
+                  {index > 0 && <hr className="border-t border-white my-2" />}
+                  <div>
+                    <h4 className="text-2xl font-bold">Milestone {index + 1}</h4>
+                    <div>{stage.milestones[index].description}</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-x-16 sm:gap-y-1 mt-4">
+                      <div>
+                        <span className="text-xl font-bold">Requested</span>
+                        <select className="block select select-bordered mt-1 w-full max-w-[10rem]" disabled={true}>
+                          <option>{formatEther(stage.milestones[index].requestedAmount)} ETH</option>
+                        </select>
+                      </div>
+                      <FormSelect
+                        label="Granted"
+                        options={["0.25", "0.5", "1", "2"]}
+                        {...getCommonOptions(`milestones.${index}.grantedAmount`)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <h3 className="text-xl font-bold">Total Granted: {totalAmount} ETH</h3>
+            <hr className="border-t border-black my-2" />
             <FormTextarea label="Note (visible to grantee)" {...getCommonOptions("statusNote")} />
             {loadingStatusText && (
               <div className="text-xl flex justify-center items-center gap-2 my-2">

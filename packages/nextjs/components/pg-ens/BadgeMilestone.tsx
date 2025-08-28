@@ -1,6 +1,6 @@
-import { LargeMilestoneStatus } from "~~/services/database/repositories/large-milestones";
+import { MilestoneStatus } from "~~/services/database/config/schema";
 
-const badgeBgColor: Record<LargeMilestoneStatus, string> = {
+const badgeBgColor: Record<MilestoneStatus, string> = {
   proposed: "bg-warning",
   rejected: "bg-error",
   completed: "bg-warning",
@@ -9,7 +9,7 @@ const badgeBgColor: Record<LargeMilestoneStatus, string> = {
   approved: "bg-success",
 };
 
-const badgeTextColor: Record<LargeMilestoneStatus, string> = {
+const badgeTextColor: Record<MilestoneStatus, string> = {
   proposed: "text-primary-orange",
   rejected: "text-primary-red",
   completed: "text-primary-orange",
@@ -21,12 +21,12 @@ const badgeTextColor: Record<LargeMilestoneStatus, string> = {
 type BadgeSize = "sm" | "md";
 
 type BadgeProps = {
-  status: LargeMilestoneStatus;
+  status: MilestoneStatus;
   size?: BadgeSize;
   className?: string;
 };
 
-export const statusText: Record<LargeMilestoneStatus, string> = {
+export const statusText: Record<MilestoneStatus, string> = {
   proposed: "Proposed",
   rejected: "Rejected",
   completed: "Completed (Pending Review)",

@@ -2,7 +2,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useAccount, useSignTypedData } from "wagmi";
 import { ReviewMilestoneBody } from "~~/app/api/large-milestones/[milestoneId]/review/route";
-import { LargeMilestoneStatus } from "~~/services/database/repositories/large-milestones";
+import { MilestoneStatus } from "~~/services/database/config/schema";
 import { EIP_712_DOMAIN, EIP_712_TYPES__REVIEW_LARGE_MILESTONE } from "~~/utils/eip712";
 import { postMutationFetcher } from "~~/utils/react-query";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
@@ -23,7 +23,7 @@ export const useLargeMilestoneReview = (milestoneId?: number) => {
     statusNote,
     completionProof,
   }: {
-    status: LargeMilestoneStatus;
+    status: MilestoneStatus;
     txHash?: string;
     statusNote?: string;
     completionProof?: string;
