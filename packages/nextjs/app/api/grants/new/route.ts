@@ -39,6 +39,7 @@ export async function POST(req: Request) {
     await notifyTelegramBot("grant", {
       id: result.grantId,
       ...body,
+      requestedFunds: totalAmount,
       builderAddress,
     });
 

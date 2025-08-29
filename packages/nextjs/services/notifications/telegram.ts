@@ -23,7 +23,7 @@ type StageData = {
   milestone?: MilestoneDataFromDB;
 };
 
-type GrantData = CreateNewGrantReqBody & { builderAddress: string };
+type GrantData = CreateNewGrantReqBody & { builderAddress: string; requestedFunds: bigint };
 type LargeGrantData = CreateNewLargeGrantReqBody & { builderAddress: string };
 
 export async function notifyTelegramBot<
