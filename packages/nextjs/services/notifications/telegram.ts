@@ -6,6 +6,7 @@ import { CreateNewLargeGrantReqBody } from "~~/app/api/large-grants/new/route";
 import { CreateNewLargeStageReqBody } from "~~/app/api/large-stages/new/route";
 import { CreateNewStageReqBody } from "~~/app/api/stages/new/route";
 import { GrantWithStages } from "~~/app/grants/[grantId]/page";
+import { replacer } from "~~/utils/scaffold-eth/common";
 
 const TELEGRAM_BOT_URL = process.env.TELEGRAM_BOT_URL;
 const TELEGRAM_WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
@@ -47,7 +48,7 @@ export async function notifyTelegramBot<
         "Content-Type": "application/json",
         "X-Webhook-Secret": TELEGRAM_WEBHOOK_SECRET,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data, replacer),
     });
 
     if (!response.ok) {
