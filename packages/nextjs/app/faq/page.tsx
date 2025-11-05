@@ -91,6 +91,28 @@ const FAQ: NextPage = () => {
           answer:
             "Rather than providing all funds upfront, we release funding as you achieve specific milestones. This approach helps ensure sustained progress while providing regular opportunities for feedback and support. You'll work with our team to define meaningful milestones that align with your project's goals and our evaluation criteria.",
         },
+        {
+          question: "Are milestone payouts guaranteed? How are they approved?",
+          answer: (
+            <div className="space-y-3">
+              <p>No. Milestone payouts are based on impact evaluation, not blanket pre-approval.</p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li>
+                  <strong>USDC grants</strong>: Milestone funds are released only after the milestone is reviewed and
+                  explicitly approved based on demonstrated impact.
+                </li>
+                <li>
+                  <strong>ETH grants</strong>: Do not have per-milestone withdrawal approvals. Recipients can withdraw
+                  the milestone funds once the milestone is completed and their stream has unlocked sufficient funds.
+                </li>
+              </ul>
+              <p>
+                We may adjust, defer, or decline subsequent milestone payouts if impact is not demonstrated. Include
+                clear, measurable impact criteria in your milestones to speed up reviews.
+              </p>
+            </div>
+          ),
+        },
       ],
     },
     {
