@@ -1,6 +1,7 @@
 "use client";
 
-import { gql, useQuery } from "@apollo/client";
+import { useState } from "react";
+import { gql, useLazyQuery } from "@apollo/client";
 import { formatEther } from "viem";
 import { getFormattedDateWithDay } from "~~/utils/getFormattedDate";
 
@@ -73,15 +74,12 @@ type SerializedLargeGrant = {
 
 type SerializedGrantData = SerializedGrant | SerializedLargeGrant;
 
-type Props = {
-  grants: SerializedGrantData[];
-};
+export default function ExportCSVButton() {
+  const [isExporting, setIsExporting] = useState(false);
 
-export default function ExportCSVButton({ grants }: Props) {
-  // Try to fetch withdrawals, but don't block export if it fails
-  const { data: withdrawalData, loading } = useQuery(WITHDRAWALS_QUERY, {
+  // Lazy query for withdrawals - only fetch when needed
+  const [fetchWithdrawals] = useLazyQuery(WITHDRAWALS_QUERY, {
     fetchPolicy: "network-only",
-    // Don't throw errors, just return empty data
     errorPolicy: "ignore",
   });
 
@@ -95,7 +93,7 @@ export default function ExportCSVButton({ grants }: Props) {
     return stringValue;
   };
 
-  const generateCSV = () => {
+  const generateCSV = async (grants: SerializedGrantData[], withdrawalData: any) => {
     const headers = [
       "ID",
       "Project Name",
@@ -197,31 +195,53 @@ export default function ExportCSVButton({ grants }: Props) {
     return rows.map(row => row.join(",")).join("\n");
   };
 
-  const handleDownload = () => {
-    const csv = generateCSV();
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    const filename = `grants_export_${new Date().toISOString().split("T")[0]}.csv`;
+  const handleDownload = async () => {
+    try {
+      setIsExporting(true);
 
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+      // Fetch fresh data from the server
+      const response = await fetch("/api/grants/export");
+      if (!response.ok) {
+        throw new Error("Failed to fetch grant data");
+      }
+      const grants: SerializedGrantData[] = await response.json();
+
+      // Fetch withdrawal data
+      const { data: withdrawalData } = await fetchWithdrawals();
+
+      // Generate CSV
+      const csv = await generateCSV(grants, withdrawalData);
+
+      // Download CSV
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      const filename = `grants_export_${new Date().toISOString().split("T")[0]}.csv`;
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      alert("Failed to export CSV. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
     <button
       onClick={handleDownload}
-      disabled={loading}
+      disabled={isExporting}
       className={`mb-6 self-end px-4 py-2 bg-green-600 text-white rounded ${
-        loading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"
+        isExporting ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"
       }`}
     >
-      {loading ? "Loading..." : "Export to CSV"}
+      {isExporting ? "Exporting..." : "Export to CSV"}
     </button>
   );
 }
