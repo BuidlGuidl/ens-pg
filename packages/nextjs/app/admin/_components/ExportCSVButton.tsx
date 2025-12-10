@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { gql, useLazyQuery } from "@apollo/client";
 import { formatEther } from "viem";
-import { getFormattedDateWithDay } from "~~/utils/getFormattedDate";
 
 const WITHDRAWALS_QUERY = gql`
   query GetAllWithdrawals {
@@ -143,7 +142,7 @@ export default function ExportCSVButton() {
           rows.push([
             escapeCSV(grant.id),
             escapeCSV(grant.title),
-            escapeCSV(grant.submitedAt ? getFormattedDateWithDay(new Date(grant.submitedAt)) : ""),
+            escapeCSV(grant.submitedAt ? new Date(grant.submitedAt).toLocaleDateString() : ""),
             escapeCSV(grant.builderAddress),
             escapeCSV(grant.email),
             escapeCSV(stage.stageNumber),
@@ -176,7 +175,7 @@ export default function ExportCSVButton() {
           rows.push([
             escapeCSV(grant.id),
             escapeCSV(grant.title),
-            escapeCSV(grant.submitedAt ? getFormattedDateWithDay(new Date(grant.submitedAt)) : ""),
+            escapeCSV(grant.submitedAt ? new Date(grant.submitedAt).toLocaleDateString() : ""),
             escapeCSV(grant.builderAddress),
             escapeCSV(grant.email),
             escapeCSV(stage.stageNumber),
