@@ -6,9 +6,8 @@ import { formatEther } from "viem";
 
 const WITHDRAWALS_QUERY = gql`
   query GetAllWithdrawals {
-    withdrawals(orderBy: "timestamp", orderDirection: "asc") {
+    withdrawals(orderBy: "timestamp", orderDirection: "asc", limit: 1000) {
       items {
-        id
         amount
         grantNumber
         stageNumber
@@ -114,7 +113,7 @@ export default function ExportCSVButton() {
     const withdrawalsByGrantAndStage: Record<string, bigint> = {};
     if (withdrawalData?.withdrawals?.items) {
       withdrawalData.withdrawals.items.forEach((withdrawal: any) => {
-        const key = `${withdrawal.grantNumber}-${withdrawal.stageNumber}`;
+        const key = `${withdrawal.to.toLowerCase()}-${withdrawal.grantNumber}-${withdrawal.stageNumber}`;
         const amount = BigInt(withdrawal.amount || 0);
         withdrawalsByGrantAndStage[key] = (withdrawalsByGrantAndStage[key] || 0n) + amount;
       });
@@ -126,7 +125,7 @@ export default function ExportCSVButton() {
       if (grant.type === "grant") {
         // ETH Grant
         grant.stages.forEach(stage => {
-          const stageKey = `${grant.grantNumber}-${stage.stageNumber}`;
+          const stageKey = `${grant.builderAddress.toLowerCase()}-${grant.grantNumber}-${stage.stageNumber}`;
           const withdrawn = withdrawalsByGrantAndStage[stageKey] || 0n;
 
           // If proposed or rejected, amount granted is 0
