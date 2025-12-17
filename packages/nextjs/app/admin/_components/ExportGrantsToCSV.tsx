@@ -78,7 +78,6 @@ export default function ExportGrantsToCSV() {
   // Lazy query for withdrawals - only fetch when needed
   const [fetchWithdrawals] = useLazyQuery(WITHDRAWALS_QUERY, {
     fetchPolicy: "network-only",
-    errorPolicy: "ignore",
   });
 
   const escapeCSV = (value: string | number | null | undefined): string => {
@@ -208,7 +207,11 @@ export default function ExportGrantsToCSV() {
       const grants: SerializedGrantData[] = await response.json();
 
       // Fetch withdrawal data
-      const { data: withdrawalData } = await fetchWithdrawals();
+      const { data: withdrawalData, error: withdrawalError } = await fetchWithdrawals();
+
+      if (withdrawalError) {
+        throw new Error("Failed to fetch withdrawal data");
+      }
 
       // Generate CSV
       const csv = await generateCSV(grants, withdrawalData);
