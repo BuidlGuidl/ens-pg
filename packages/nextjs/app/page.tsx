@@ -4,6 +4,7 @@ import { GrantsStats } from "./_components/stats/GrantsStats";
 import { LargeGrantsStats } from "./_components/stats/LargeGrantsStats";
 import type { NextPage } from "next";
 import { Button } from "~~/components/pg-ens/Button";
+import scaffoldConfig from "~~/scaffold.config";
 
 export const revalidate = 21600; // 6 hours
 
@@ -71,9 +72,18 @@ const Home: NextPage = () => {
             Receive up to 2 ETH in a stream that unlocks over 30 days. While milestone withdrawals do not need approval,
             each grant stage and its milestones will be reviewed by our stewards.
           </p>
-          <Button link href="/apply">
-            Apply for a grant
-          </Button>
+          {new Date() < scaffoldConfig.applicationsReopenDate ? (
+            <>
+              <Button disabled className="opacity-50 cursor-not-allowed">
+                Applications Closed
+              </Button>
+              <p className="mt-4 text-sm font-medium text-gray-700">Applications will reopen on January 3rd, 2026</p>
+            </>
+          ) : (
+            <Button link href="/apply">
+              Apply for a grant
+            </Button>
+          )}
         </div>
 
         <div className="text-center bg-light-purple flex flex-col items-center py-10 sm:py-16 px-4">
@@ -81,9 +91,18 @@ const Home: NextPage = () => {
           <p className="mb-8 max-w-lg">
             Milestone funds will be unlocked and sent to you once the milestone completion is reviewed by our stewards.
           </p>
-          <Button link href="/large-grant-apply">
-            Apply for a grant
-          </Button>
+          {new Date() < scaffoldConfig.applicationsReopenDate ? (
+            <>
+              <Button disabled className="opacity-50 cursor-not-allowed">
+                Applications Closed
+              </Button>
+              <p className="mt-4 text-sm font-medium text-gray-700">Applications will reopen on January 3rd, 2026</p>
+            </>
+          ) : (
+            <Button link href="/large-grant-apply">
+              Apply for a grant
+            </Button>
+          )}
         </div>
       </div>
 

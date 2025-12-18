@@ -19,6 +19,7 @@ import { FormInputNumber } from "~~/components/pg-ens/form-fields/FormInputNumbe
 import { FormTextarea } from "~~/components/pg-ens/form-fields/FormTextarea";
 import { useAuthSession } from "~~/hooks/pg-ens/useAuthSession";
 import { useFormMethods } from "~~/hooks/pg-ens/useFormMethods";
+import scaffoldConfig from "~~/scaffold.config";
 import { postMutationFetcher } from "~~/utils/react-query";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
 
@@ -83,6 +84,8 @@ const LargeGrantApply: NextPage = () => {
 
   const watchMilestones = watch("milestones");
   const totalAmount = watchMilestones.reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  const applicationsAreClosed = new Date() < scaffoldConfig.applicationsReopenDate;
 
   return (
     <div className="flex flex-col w-full items-center justify-center p-6 sm:p-10">
@@ -200,10 +203,21 @@ const LargeGrantApply: NextPage = () => {
                 Connect wallet
               </Button>
             ) : (
-              <Button type="submit" disabled={isPostingNewGrant} className="mt-4 self-center ">
-                {isPostingNewGrant && <span className="loading loading-spinner"></span>}
-                Submit
-              </Button>
+              <>
+                <Button
+                  type="submit"
+                  disabled={applicationsAreClosed || isPostingNewGrant}
+                  className="mt-4 self-center"
+                >
+                  {isPostingNewGrant && <span className="loading loading-spinner"></span>}
+                  {applicationsAreClosed ? "Applications Closed" : "Submit"}
+                </Button>
+                {applicationsAreClosed && (
+                  <p className="text-center text-sm font-medium text-gray-700 mt-2">
+                    Applications will reopen on January 3rd, 2026
+                  </p>
+                )}
+              </>
             )}
             <p className="text-center text-lg text-base-content/80 mt-4">
               We assess grants on a rolling basis, you can check the status of your grant in{" "}

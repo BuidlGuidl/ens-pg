@@ -8,6 +8,7 @@ export type ScaffoldConfig = {
   disableBurnerWalletOnLocal: boolean;
   onlyLocalBurnerWallet: boolean;
   startBlock: number;
+  applicationsReopenDate: Date;
 };
 
 const scaffoldConfig = {
@@ -38,6 +39,9 @@ const scaffoldConfig = {
 
   // start blocknumber for contract deployment indexing
   startBlock: 128564237,
+
+  // Date when grant applications will reopen
+  applicationsReopenDate: new Date("2026-01-03T00:00:00Z"),
 } as const satisfies ScaffoldConfig;
 
 export default scaffoldConfig;
