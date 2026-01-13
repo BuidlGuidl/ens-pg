@@ -41,7 +41,7 @@ const scaffoldConfig = {
   startBlock: 128564237,
 
   // Date when grant applications will reopen
-  applicationsReopenDate: new Date("2026-01-03T00:00:00Z"),
+  applicationsReopenDate: new Date("2026-02-13T00:00:00Z"),
 } as const satisfies ScaffoldConfig;
 
 export default scaffoldConfig;
