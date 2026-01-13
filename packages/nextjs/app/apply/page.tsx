@@ -223,7 +223,7 @@ const Apply: NextPage = () => {
                 </Button>
                 {applicationsAreClosed && (
                   <p className="text-center text-sm font-medium text-gray-700 mt-2">
-                    Applications will reopen on January 3rd, 2026
+                    Applications closed during ENS DAO Retro
                   </p>
                 )}
               </>

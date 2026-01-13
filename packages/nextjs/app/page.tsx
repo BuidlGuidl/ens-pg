@@ -77,7 +77,7 @@ const Home: NextPage = () => {
               <Button disabled className="opacity-50 cursor-not-allowed">
                 Applications Closed
               </Button>
-              <p className="mt-4 text-sm font-medium text-gray-700">Applications will reopen on January 3rd, 2026</p>
+              <p className="mt-4 text-sm font-medium text-gray-700">Applications closed during ENS DAO Retro</p>
             </>
           ) : (
             <Button link href="/apply">
@@ -96,7 +96,7 @@ const Home: NextPage = () => {
               <Button disabled className="opacity-50 cursor-not-allowed">
                 Applications Closed
               </Button>
-              <p className="mt-4 text-sm font-medium text-gray-700">Applications will reopen on January 3rd, 2026</p>
+              <p className="mt-4 text-sm font-medium text-gray-700">Applications closed during ENS DAO Retro</p>
             </>
           ) : (
             <Button link href="/large-grant-apply">
