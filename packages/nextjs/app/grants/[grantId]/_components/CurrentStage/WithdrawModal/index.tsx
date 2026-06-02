@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { WithdrawModalFormValues, withdrawModalFormSchema } from "./schema";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -9,12 +9,15 @@ import { apolloClient } from "~~/components/ScaffoldEthAppWithProviders";
 import { Button } from "~~/components/pg-ens/Button";
 import { FormTextarea } from "~~/components/pg-ens/form-fields/FormTextarea";
 import { useFormMethods } from "~~/hooks/pg-ens/useFormMethods";
+import { useHandleLogin } from "~~/hooks/pg-ens/useHandleLogin";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { Milestone } from "~~/services/database/repositories/milestones";
+import { hasActiveUserSession } from "~~/utils/admin-session";
 import { multilineStringToTsx } from "~~/utils/multiline-string-to-tsx";
 import { postMutationFetcher } from "~~/utils/react-query";
 import { fetcher } from "~~/utils/react-query";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
+import { REAUTH_UI_TEXT, SESSION_MESSAGES } from "~~/utils/session-messages";
 
 type WithdrawModalProps = {
   milestone: Milestone;
@@ -26,11 +29,16 @@ type WithdrawModalProps = {
 export const WithdrawModal = forwardRef<HTMLDialogElement, WithdrawModalProps>(
   ({ milestone, closeModal, contractGrantId, refetchContractInfo }, ref) => {
     const router = useRouter();
+    const [pendingPaymentTx, setPendingPaymentTx] = useState<string | null>(null);
+    const [pendingCompletionProof, setPendingCompletionProof] = useState<string | null>(null);
+    const [requiresSession, setRequiresSession] = useState(false);
+    const [isReauthenticating, setIsReauthenticating] = useState(false);
+    const { handleLogin } = useHandleLogin();
 
     const { formMethods, getCommonOptions } = useFormMethods<WithdrawModalFormValues>({
       schema: withdrawModalFormSchema,
     });
-    const { handleSubmit, reset: clearFormValues } = formMethods;
+    const { handleSubmit, reset: clearFormValues, getValues } = formMethods;
 
     const { writeContractAsync, isPending: isWritingWithOnChain } = useScaffoldWriteContract("Stream");
 
@@ -49,6 +57,15 @@ export const WithdrawModal = forwardRef<HTMLDialogElement, WithdrawModalProps>(
       try {
         const { completionProof } = fieldValues;
 
+        const hasUserSession = await hasActiveUserSession();
+        if (!hasUserSession) {
+          setRequiresSession(true);
+          notification.error(SESSION_MESSAGES.genericExpiredRetry);
+          return;
+        }
+
+        setRequiresSession(false);
+
         if (!milestoneStatus) {
           notification.error("Error loading milestone.");
           return;
@@ -64,15 +81,31 @@ export const WithdrawModal = forwardRef<HTMLDialogElement, WithdrawModalProps>(
           return;
         }
 
-        txnHash = await writeContractAsync({
-          functionName: "streamWithdraw",
-          args: [contractGrantId, milestone.grantedAmount || 0n, completionProof],
-        });
+        txnHash = pendingPaymentTx ?? undefined;
+
+        if (!txnHash) {
+          txnHash = await writeContractAsync({
+            functionName: "streamWithdraw",
+            args: [contractGrantId, milestone.grantedAmount || 0n, completionProof],
+          });
+        }
+
+        if (!txnHash) {
+          notification.error("Error withdrawing milestone");
+          return;
+        }
+
+        setPendingPaymentTx(txnHash);
+        setPendingCompletionProof(completionProof);
 
         await postCompleteMilestone({
-          paymentTx: txnHash || "",
+          paymentTx: txnHash,
           completionProof,
         });
+
+        setPendingPaymentTx(null);
+        setPendingCompletionProof(null);
+        setRequiresSession(false);
 
         await apolloClient.refetchQueries({
           include: "active",
@@ -87,8 +120,71 @@ export const WithdrawModal = forwardRef<HTMLDialogElement, WithdrawModalProps>(
           // error was from writeContractAsync and already handled
           return;
         }
+
+        if ((error as { status?: number })?.status === 401) {
+          setRequiresSession(true);
+          notification.error(SESSION_MESSAGES.withdrawSyncAfterOnChainFailed);
+          return;
+        }
+
         const errorMessage = getParsedError(error);
         notification.error(errorMessage);
+      }
+    };
+
+    const handleReauthenticateAndRetry = async () => {
+      if (isReauthenticating) return;
+
+      setIsReauthenticating(true);
+      try {
+        const loggedIn = await handleLogin();
+        if (!loggedIn) {
+          notification.error(SESSION_MESSAGES.reauthFailed);
+          return;
+        }
+
+        const hasUserSession = await hasActiveUserSession();
+        if (!hasUserSession) {
+          setRequiresSession(true);
+          notification.error(SESSION_MESSAGES.sessionStillUnavailable);
+          return;
+        }
+
+        setRequiresSession(false);
+
+        const completionProof = pendingCompletionProof || getValues("completionProof");
+        if (!pendingPaymentTx || !completionProof) {
+          notification.success(SESSION_MESSAGES.sessionRestoredWithdrawAgain);
+          return;
+        }
+
+        await postCompleteMilestone({
+          paymentTx: pendingPaymentTx,
+          completionProof,
+        });
+
+        setPendingPaymentTx(null);
+        setPendingCompletionProof(null);
+
+        await apolloClient.refetchQueries({
+          include: "active",
+        });
+        await refetchContractInfo();
+
+        closeModal();
+        clearFormValues();
+        router.refresh();
+      } catch (error) {
+        if ((error as { status?: number })?.status === 401) {
+          setRequiresSession(true);
+          notification.error(SESSION_MESSAGES.withdrawSyncAfterOnChainFailed);
+          return;
+        }
+
+        const errorMessage = getParsedError(error);
+        notification.error(errorMessage);
+      } finally {
+        setIsReauthenticating(false);
       }
     };
 
@@ -122,9 +218,31 @@ export const WithdrawModal = forwardRef<HTMLDialogElement, WithdrawModalProps>(
                   *Video walkthrough, GitHub repo or other deliverables
                 </span>
               </div>
+              {(pendingPaymentTx || requiresSession) && (
+                <div className="rounded-lg border border-warning px-3 py-2 my-2">
+                  <p className="text-sm mb-2">
+                    {pendingPaymentTx ? REAUTH_UI_TEXT.withdrawPendingSync : REAUTH_UI_TEXT.withdrawSessionExpired}
+                  </p>
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    className="self-start"
+                    onClick={handleReauthenticateAndRetry}
+                    disabled={isReauthenticating || isPostingCompleteMilestone}
+                  >
+                    {isReauthenticating
+                      ? REAUTH_UI_TEXT.reauthenticating
+                      : pendingPaymentTx
+                      ? REAUTH_UI_TEXT.reauthAndRetry
+                      : REAUTH_UI_TEXT.reauth}
+                  </Button>
+                </div>
+              )}
               <Button
                 type="submit"
-                disabled={isWritingWithOnChain || isPostingCompleteMilestone || isLoadingMilestoneStatus}
+                disabled={
+                  isWritingWithOnChain || isPostingCompleteMilestone || isLoadingMilestoneStatus || isReauthenticating
+                }
                 className="self-center"
               >
                 {(isWritingWithOnChain || isPostingCompleteMilestone || isLoadingMilestoneStatus) && (

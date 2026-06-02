@@ -8,9 +8,12 @@ import { Button } from "~~/components/pg-ens/Button";
 import { FormTextarea } from "~~/components/pg-ens/form-fields/FormTextarea";
 import { Address } from "~~/components/scaffold-eth";
 import { useFormMethods } from "~~/hooks/pg-ens/useFormMethods";
+import { useHandleLogin } from "~~/hooks/pg-ens/useHandleLogin";
 import { useLargeMilestoneReview } from "~~/hooks/pg-ens/useLargeMilestoneReview";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { hasActiveAdminSession } from "~~/utils/admin-session";
 import { notification } from "~~/utils/scaffold-eth";
+import { REAUTH_UI_TEXT, SESSION_MESSAGES } from "~~/utils/session-messages";
 
 const LOADING_STATUS_MAP = {
   Approving: "Approving milestone",
@@ -43,13 +46,18 @@ export const LargeMilestoneApprovalModal = forwardRef<
 >(({ milestone, closeModal }, ref) => {
   const { reviewMilestone, isSigning } = useLargeMilestoneReview(milestone.id);
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(LOADING_STATUS_MAP.Empty);
+  const [pendingMilestoneTxHash, setPendingMilestoneTxHash] = useState<string | null>(null);
+  const [pendingMilestoneStatus, setPendingMilestoneStatus] = useState<"paid" | "verified" | null>(null);
+  const [requiresAdminSession, setRequiresAdminSession] = useState(false);
+  const [isReauthenticating, setIsReauthenticating] = useState(false);
+  const { handleLogin } = useHandleLogin();
   const router = useRouter();
 
   const { getCommonOptions, formMethods } = useFormMethods<FinalApproveModalFormValues>({
     schema: finalApproveModalFormSchema,
   });
 
-  const { handleSubmit } = formMethods;
+  const { handleSubmit, getValues } = formMethods;
 
   const { writeContractAsync, isPending: isWriteContractPending } = useScaffoldWriteContract("LargeGrant");
 
@@ -84,23 +92,84 @@ export const LargeMilestoneApprovalModal = forwardRef<
   };
 
   const onSubmit = async (fieldValues: FinalApproveModalFormValues) => {
-    const txHash = await handleApproveMilestone();
+    const hasAdminSession = await hasActiveAdminSession();
+    if (!hasAdminSession) {
+      setLoadingStatus(LOADING_STATUS_MAP.Empty);
+      setRequiresAdminSession(true);
+      notification.error(SESSION_MESSAGES.adminExpiredMilestoneApproval);
+      return;
+    }
+
+    setRequiresAdminSession(false);
+    const nextStatus = pendingMilestoneStatus || (milestone.status === "verified" ? "paid" : "verified");
+    const txHash = pendingMilestoneTxHash || (await handleApproveMilestone());
+
     if (!txHash) {
       setLoadingStatus(LOADING_STATUS_MAP.Empty);
       return notification.error("Error approving milestone");
     }
-    if (milestone.status === "verified") {
-      setLoadingStatus(LOADING_STATUS_MAP.Completing);
-      await reviewMilestone({ status: "paid", ...fieldValues, txHash });
-      setLoadingStatus(LOADING_STATUS_MAP.Empty);
-    }
-    if (milestone.status === "completed") {
-      setLoadingStatus(LOADING_STATUS_MAP.Approving);
-      await reviewMilestone({ status: "verified", ...fieldValues, txHash });
-      setLoadingStatus(LOADING_STATUS_MAP.Empty);
-    }
+
+    setPendingMilestoneTxHash(txHash);
+    setPendingMilestoneStatus(nextStatus);
+    setLoadingStatus(nextStatus === "paid" ? LOADING_STATUS_MAP.Completing : LOADING_STATUS_MAP.Approving);
+    const isReviewed = await reviewMilestone({ status: nextStatus, ...fieldValues, txHash });
+    setLoadingStatus(LOADING_STATUS_MAP.Empty);
+
+    if (!isReviewed) return;
+
+    setPendingMilestoneTxHash(null);
+    setPendingMilestoneStatus(null);
+    setRequiresAdminSession(false);
     closeModal();
     router.refresh();
+  };
+
+  const handleReauthenticateAndRetry = async () => {
+    if (isReauthenticating) return;
+
+    setIsReauthenticating(true);
+    try {
+      const loggedIn = await handleLogin();
+      if (!loggedIn) {
+        notification.error(SESSION_MESSAGES.reauthFailed);
+        return;
+      }
+
+      const hasAdminSession = await hasActiveAdminSession();
+      if (!hasAdminSession) {
+        setRequiresAdminSession(true);
+        notification.error(SESSION_MESSAGES.adminPermissionsRequired);
+        return;
+      }
+
+      setRequiresAdminSession(false);
+
+      if (!pendingMilestoneTxHash || !pendingMilestoneStatus) {
+        notification.success(SESSION_MESSAGES.sessionRestoredSubmitAgain);
+        return;
+      }
+
+      setLoadingStatus(
+        pendingMilestoneStatus === "paid" ? LOADING_STATUS_MAP.Completing : LOADING_STATUS_MAP.Approving,
+      );
+      const fieldValues = getValues();
+      const isReviewed = await reviewMilestone({
+        status: pendingMilestoneStatus,
+        ...fieldValues,
+        txHash: pendingMilestoneTxHash,
+      });
+
+      if (!isReviewed) return;
+
+      setPendingMilestoneTxHash(null);
+      setPendingMilestoneStatus(null);
+      setRequiresAdminSession(false);
+      closeModal();
+      router.refresh();
+    } finally {
+      setLoadingStatus(LOADING_STATUS_MAP.Empty);
+      setIsReauthenticating(false);
+    }
   };
 
   const loadingStatusText = getLoadingStatusText({
@@ -151,6 +220,31 @@ export const LargeMilestoneApprovalModal = forwardRef<
             ) : (
               <div>Are you sure you want to vote for the approval of this milestone?</div>
             )}
+            {(pendingMilestoneTxHash || requiresAdminSession) && !loadingStatus && (
+              <div className="rounded-lg border border-warning px-3 py-2 my-2">
+                <p className="text-sm mb-2">
+                  {pendingMilestoneTxHash
+                    ? REAUTH_UI_TEXT.milestonePendingSync
+                    : REAUTH_UI_TEXT.milestoneSessionExpired}
+                </p>
+                <Button
+                  variant="secondary"
+                  type="button"
+                  size="sm"
+                  className="!px-4"
+                  onClick={handleReauthenticateAndRetry}
+                  disabled={isReauthenticating}
+                >
+                  <span>
+                    {isReauthenticating
+                      ? REAUTH_UI_TEXT.reauthenticating
+                      : pendingMilestoneTxHash
+                      ? REAUTH_UI_TEXT.reauthAndRetry
+                      : REAUTH_UI_TEXT.reauth}
+                  </span>
+                </Button>
+              </div>
+            )}
             {loadingStatusText && (
               <div className="text-xl flex justify-center items-center gap-2 my-2">
                 <span className="loading loading-spinner" />
@@ -162,7 +256,7 @@ export const LargeMilestoneApprovalModal = forwardRef<
                 variant="secondary"
                 size="sm"
                 type="button"
-                disabled={Boolean(loadingStatus)}
+                disabled={Boolean(loadingStatus) || isReauthenticating}
                 className="self-center"
                 onClick={closeModal}
               >
@@ -173,7 +267,7 @@ export const LargeMilestoneApprovalModal = forwardRef<
                 type="submit"
                 className="!px-4 self-center"
                 size="sm"
-                disabled={Boolean(loadingStatus)}
+                disabled={Boolean(loadingStatus) || isReauthenticating}
               >
                 <span>{milestone.status === "verified" ? "Final Approve" : "Approve"}</span>
               </Button>
