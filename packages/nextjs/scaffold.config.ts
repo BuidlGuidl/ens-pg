@@ -8,7 +8,7 @@ export type ScaffoldConfig = {
   disableBurnerWalletOnLocal: boolean;
   onlyLocalBurnerWallet: boolean;
   startBlock: number;
-  applicationsReopenDate: Date;
+  applicationsOpen: boolean;
 };
 
 const scaffoldConfig = {
@@ -35,13 +35,13 @@ const scaffoldConfig = {
   onlyLocalBurnerWallet: true,
 
   // disable burner wallet for all networks
-  disableBurnerWalletOnLocal: true,
+  disableBurnerWalletOnLocal: false,
 
   // start blocknumber for contract deployment indexing
   startBlock: 128564237,
 
-  // Date when grant applications will reopen
-  applicationsReopenDate: new Date("2026-02-01T00:00:00Z"),
+  // applications open flag
+  applicationsOpen: false,
 } as const satisfies ScaffoldConfig;
 
 export default scaffoldConfig;

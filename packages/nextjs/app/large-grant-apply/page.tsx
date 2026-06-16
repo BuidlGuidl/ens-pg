@@ -85,7 +85,7 @@ const LargeGrantApply: NextPage = () => {
   const watchMilestones = watch("milestones");
   const totalAmount = watchMilestones.reduce((acc, curr) => acc + Number(curr.amount), 0);
 
-  const applicationsAreClosed = new Date() < scaffoldConfig.applicationsReopenDate;
+  const applicationsAreClosed = !scaffoldConfig.applicationsOpen;
 
   return (
     <div className="flex flex-col w-full items-center justify-center p-6 sm:p-10">
@@ -212,11 +212,6 @@ const LargeGrantApply: NextPage = () => {
                   {isPostingNewGrant && <span className="loading loading-spinner"></span>}
                   {applicationsAreClosed ? "Applications Closed" : "Submit"}
                 </Button>
-                {applicationsAreClosed && (
-                  <p className="text-center text-sm font-medium text-gray-700 mt-2">
-                    Applications closed during ENS DAO Retro
-                  </p>
-                )}
               </>
             )}
             <p className="text-center text-lg text-base-content/80 mt-4">
