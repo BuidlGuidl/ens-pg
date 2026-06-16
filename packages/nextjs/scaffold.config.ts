@@ -35,7 +35,7 @@ const scaffoldConfig = {
   onlyLocalBurnerWallet: true,
 
   // disable burner wallet for all networks
-  disableBurnerWalletOnLocal: false,
+  disableBurnerWalletOnLocal: true,
 
   // start blocknumber for contract deployment indexing
   startBlock: 128564237,
