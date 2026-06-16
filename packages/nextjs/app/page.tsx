@@ -63,6 +63,20 @@ const Home: NextPage = () => {
             <WorkflowItem key={title} step={idx + 1} title={title} description={description} />
           ))}
         </div>
+
+        {!scaffoldConfig.applicationsOpen && (
+          <div className="mt-12 w-full max-w-[720px] rounded-2xl border border-base-300 bg-gradient-to-b from-white to-base-100 px-6 py-7 shadow-center sm:px-8 sm:py-8">
+            <p className="text-center text-sm font-semibold uppercase tracking-[0.12em] text-base-content/70">
+              Applications Closed
+            </p>
+            <p className="mt-3 text-center text-lg font-medium leading-relaxed text-base-content">
+              The ENS Public Goods Working Group thanks you for building.
+            </p>
+            <p className="text-center text-lg font-medium leading-relaxed text-base-content">
+              Grants are now closed as the Working Group is sunsetting.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="w-full mx-auto grid md:grid-cols-2">
