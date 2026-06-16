@@ -72,17 +72,16 @@ const Home: NextPage = () => {
             Receive up to 2 ETH in a stream that unlocks over 30 days. While milestone withdrawals do not need approval,
             each grant stage and its milestones will be reviewed by our stewards.
           </p>
-          {new Date() < scaffoldConfig.applicationsReopenDate ? (
+          {scaffoldConfig.applicationsOpen ? (
+            <Button link href="/apply">
+              Apply for a grant
+            </Button>
+          ) : (
             <>
               <Button disabled className="opacity-50 cursor-not-allowed">
                 Applications Closed
               </Button>
-              <p className="mt-4 text-sm font-medium text-gray-700">Applications closed during ENS DAO Retro</p>
             </>
-          ) : (
-            <Button link href="/apply">
-              Apply for a grant
-            </Button>
           )}
         </div>
 
@@ -91,17 +90,16 @@ const Home: NextPage = () => {
           <p className="mb-8 max-w-lg">
             Milestone funds will be unlocked and sent to you once the milestone completion is reviewed by our stewards.
           </p>
-          {new Date() < scaffoldConfig.applicationsReopenDate ? (
+          {scaffoldConfig.applicationsOpen ? (
+            <Button link href="/large-grant-apply">
+              Apply for a grant
+            </Button>
+          ) : (
             <>
               <Button disabled className="opacity-50 cursor-not-allowed">
                 Applications Closed
               </Button>
-              <p className="mt-4 text-sm font-medium text-gray-700">Applications closed during ENS DAO Retro</p>
             </>
-          ) : (
-            <Button link href="/large-grant-apply">
-              Apply for a grant
-            </Button>
           )}
         </div>
       </div>
