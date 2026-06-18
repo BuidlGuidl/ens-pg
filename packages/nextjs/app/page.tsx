@@ -3,6 +3,7 @@ import { WorkflowItem } from "./_components/WorkflowItem";
 import { GrantsStats } from "./_components/stats/GrantsStats";
 import { LargeGrantsStats } from "./_components/stats/LargeGrantsStats";
 import type { NextPage } from "next";
+import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { Button } from "~~/components/pg-ens/Button";
 import scaffoldConfig from "~~/scaffold.config";
 
@@ -64,6 +65,27 @@ const Home: NextPage = () => {
           ))}
         </div>
       </div>
+
+      {!scaffoldConfig.applicationsOpen && (
+        <div role="status" className="w-full bg-primary px-4 py-4 text-white shadow-sm sm:px-8">
+          <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-2 text-center sm:flex-row sm:gap-4 sm:text-left">
+            <span
+              aria-hidden="true"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-primary"
+            >
+              <LockClosedIcon className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="m-0 text-xl font-bold">Applications are closed</p>
+              <p className="m-0 mt-1 text-sm leading-relaxed text-white sm:text-base">
+                The ENS Public Goods Working Group thanks you for building.
+                <br />
+                Grants are now closed as the Working Group is sunsetting.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="w-full mx-auto grid md:grid-cols-2">
         <div className="text-center bg-pale-rose flex flex-col items-center py-10 sm:py-16 px-4">
