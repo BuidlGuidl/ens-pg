@@ -78,8 +78,9 @@ const Home: NextPage = () => {
             <div>
               <p className="m-0 text-xl font-bold">Applications are closed</p>
               <p className="m-0 mt-1 text-sm leading-relaxed text-white sm:text-base">
-                The ENS Public Goods Working Group thanks you for building. Grants are now closed as the Working Group
-                is sunsetting.
+                The ENS Public Goods Working Group thanks you for building.
+                <br />
+                Grants are now closed as the Working Group is sunsetting.
               </p>
             </div>
           </div>
