@@ -76,7 +76,7 @@ const Home: NextPage = () => {
               <LockClosedIcon className="h-5 w-5" />
             </span>
             <div>
-              <p className="m-0 text-xl font-bold">Applications are closed</p>
+              <p className="m-0 text-xl font-bold text-center">Applications are closed</p>
               <p className="m-0 mt-1 text-sm leading-relaxed text-white sm:text-base">
                 The ENS Public Goods Working Group thanks you for building.
                 <br />
