@@ -3,6 +3,7 @@ import { WorkflowItem } from "./_components/WorkflowItem";
 import { GrantsStats } from "./_components/stats/GrantsStats";
 import { LargeGrantsStats } from "./_components/stats/LargeGrantsStats";
 import type { NextPage } from "next";
+import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { Button } from "~~/components/pg-ens/Button";
 import scaffoldConfig from "~~/scaffold.config";
 
@@ -63,21 +64,27 @@ const Home: NextPage = () => {
             <WorkflowItem key={title} step={idx + 1} title={title} description={description} />
           ))}
         </div>
-
-        {!scaffoldConfig.applicationsOpen && (
-          <div className="mt-12 w-full max-w-[720px] rounded-2xl border border-base-300 bg-gradient-to-b from-white to-base-100 px-6 py-7 shadow-center sm:px-8 sm:py-8">
-            <p className="text-center text-sm font-semibold uppercase tracking-[0.12em] text-base-content/70">
-              Applications Closed
-            </p>
-            <p className="mt-3 text-center text-lg font-medium leading-relaxed text-base-content">
-              The ENS Public Goods Working Group thanks you for building.
-            </p>
-            <p className="text-center text-lg font-medium leading-relaxed text-base-content">
-              Grants are now closed as the Working Group is sunsetting.
-            </p>
-          </div>
-        )}
       </div>
+
+      {!scaffoldConfig.applicationsOpen && (
+        <div role="status" className="w-full bg-primary px-4 py-4 text-white shadow-sm sm:px-8">
+          <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-2 text-center sm:flex-row sm:gap-4 sm:text-left">
+            <span
+              aria-hidden="true"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-primary"
+            >
+              <LockClosedIcon className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="m-0 text-xl font-bold">Applications are closed</p>
+              <p className="m-0 mt-1 text-sm leading-relaxed text-white sm:text-base">
+                The ENS Public Goods Working Group thanks you for building. Grants are now closed as the Working Group
+                is sunsetting.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="w-full mx-auto grid md:grid-cols-2">
         <div className="text-center bg-pale-rose flex flex-col items-center py-10 sm:py-16 px-4">
