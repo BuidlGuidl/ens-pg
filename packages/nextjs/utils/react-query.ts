@@ -18,7 +18,9 @@ export const makeMutationFetcher =
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.error || `Error ${method.toLowerCase()}ing data`);
+      const error = new Error(data.error || `Error ${method.toLowerCase()}ing data`) as Error & { status?: number };
+      error.status = res.status;
+      throw error;
     }
     return data;
   };

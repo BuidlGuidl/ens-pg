@@ -7,10 +7,13 @@ import { Button } from "~~/components/pg-ens/Button";
 import { FormTextarea } from "~~/components/pg-ens/form-fields/FormTextarea";
 import { Address } from "~~/components/scaffold-eth";
 import { useFormMethods } from "~~/hooks/pg-ens/useFormMethods";
+import { useHandleLogin } from "~~/hooks/pg-ens/useHandleLogin";
 import { useLargeStageReview } from "~~/hooks/pg-ens/useLargeStageReview";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { LargeGrantWithStagesAndPrivateNotes } from "~~/types/utils";
+import { hasActiveAdminSession } from "~~/utils/admin-session";
 import { notification } from "~~/utils/scaffold-eth";
+import { REAUTH_UI_TEXT, SESSION_MESSAGES } from "~~/utils/session-messages";
 
 const LOADING_STATUS_MAP = {
   CreatingGrant: "Creating grant in contract",
@@ -47,13 +50,17 @@ export const LargeGrantFinalApproveModal = forwardRef<
 >(({ stage, grantName, builderAddress, isGrant, grantId }, ref) => {
   const { reviewStage, isSigning } = useLargeStageReview(stage.id);
   const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>(LOADING_STATUS_MAP.Empty);
+  const [pendingApprovedTxHash, setPendingApprovedTxHash] = useState<string | null>(null);
+  const [requiresAdminSession, setRequiresAdminSession] = useState(false);
+  const [isReauthenticating, setIsReauthenticating] = useState(false);
+  const { handleLogin } = useHandleLogin();
   const { approvalVotes } = stage;
 
   const { getCommonOptions, formMethods } = useFormMethods<FinalApproveModalFormValues>({
     schema: finalApproveModalFormSchema,
   });
 
-  const { handleSubmit } = formMethods;
+  const { handleSubmit, getValues } = formMethods;
 
   const { writeContractAsync, isPending: isWriteContractPending } = useScaffoldWriteContract("LargeGrant");
 
@@ -65,6 +72,12 @@ export const LargeGrantFinalApproveModal = forwardRef<
       enabled: !isGrant,
     },
   });
+
+  const closeDialog = () => {
+    if (ref && typeof ref !== "function") {
+      ref.current?.close();
+    }
+  };
 
   const handleCreateGrant = async () => {
     try {
@@ -99,14 +112,71 @@ export const LargeGrantFinalApproveModal = forwardRef<
   };
 
   const onSubmit = async (fieldValues: FinalApproveModalFormValues) => {
-    const txHash = await handleCreateGrant();
+    const hasAdminSession = await hasActiveAdminSession();
+    if (!hasAdminSession) {
+      setLoadingStatus(LOADING_STATUS_MAP.Empty);
+      setRequiresAdminSession(true);
+      notification.error(SESSION_MESSAGES.adminExpiredFinalApproval);
+      return;
+    }
+    setRequiresAdminSession(false);
+
+    const txHash = pendingApprovedTxHash || (await handleCreateGrant());
     if (!txHash) {
       setLoadingStatus(LOADING_STATUS_MAP.Empty);
       return notification.error("Error setting up stream");
     }
+
+    setPendingApprovedTxHash(txHash);
     setLoadingStatus(LOADING_STATUS_MAP.Approving);
-    await reviewStage({ status: "approved", ...fieldValues, txHash });
+    const isReviewed = await reviewStage({ status: "approved", ...fieldValues, txHash });
+
+    if (isReviewed) {
+      setPendingApprovedTxHash(null);
+      setRequiresAdminSession(false);
+    }
+
     setLoadingStatus(LOADING_STATUS_MAP.Empty);
+  };
+
+  const handleReauthenticateAndRetry = async () => {
+    if (isReauthenticating) return;
+
+    setIsReauthenticating(true);
+    try {
+      const loggedIn = await handleLogin();
+      if (!loggedIn) {
+        notification.error(SESSION_MESSAGES.reauthFailed);
+        return;
+      }
+
+      const hasAdminSession = await hasActiveAdminSession();
+      if (!hasAdminSession) {
+        setRequiresAdminSession(true);
+        notification.error(SESSION_MESSAGES.adminPermissionsRequired);
+        return;
+      }
+
+      setRequiresAdminSession(false);
+
+      if (!pendingApprovedTxHash) {
+        notification.success(SESSION_MESSAGES.sessionRestoredSubmitAgain);
+        return;
+      }
+
+      setLoadingStatus(LOADING_STATUS_MAP.Approving);
+      const fieldValues = getValues();
+      const isReviewed = await reviewStage({ status: "approved", ...fieldValues, txHash: pendingApprovedTxHash });
+
+      if (isReviewed) {
+        setPendingApprovedTxHash(null);
+        setRequiresAdminSession(false);
+        closeDialog();
+      }
+    } finally {
+      setLoadingStatus(LOADING_STATUS_MAP.Empty);
+      setIsReauthenticating(false);
+    }
   };
 
   const loadingStatusText = getLoadingStatusText({
@@ -140,6 +210,31 @@ export const LargeGrantFinalApproveModal = forwardRef<
           )}
           <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-1">
             <FormTextarea label="Note (visible to grantee)" {...getCommonOptions("statusNote")} />
+            {(pendingApprovedTxHash || requiresAdminSession) && !loadingStatus && (
+              <div className="rounded-lg border border-warning px-3 py-2 my-2">
+                <p className="text-sm mb-2">
+                  {pendingApprovedTxHash
+                    ? REAUTH_UI_TEXT.finalApprovalPendingSync
+                    : REAUTH_UI_TEXT.finalApprovalSessionExpired}
+                </p>
+                <Button
+                  variant="secondary"
+                  type="button"
+                  size="sm"
+                  className="!px-4"
+                  onClick={handleReauthenticateAndRetry}
+                  disabled={isReauthenticating}
+                >
+                  <span>
+                    {isReauthenticating
+                      ? REAUTH_UI_TEXT.reauthenticating
+                      : pendingApprovedTxHash
+                      ? REAUTH_UI_TEXT.reauthAndRetry
+                      : REAUTH_UI_TEXT.reauth}
+                  </span>
+                </Button>
+              </div>
+            )}
             {loadingStatusText && (
               <div className="text-xl flex justify-center items-center gap-2 my-2">
                 <span className="loading loading-spinner" />
@@ -151,7 +246,7 @@ export const LargeGrantFinalApproveModal = forwardRef<
               type="submit"
               size="sm"
               className="!px-4 self-center"
-              disabled={Boolean(loadingStatus)}
+              disabled={Boolean(loadingStatus) || isReauthenticating}
             >
               <span>Final Approve</span>
             </Button>

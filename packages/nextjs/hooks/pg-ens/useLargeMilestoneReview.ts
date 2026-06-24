@@ -3,9 +3,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useAccount, useSignTypedData } from "wagmi";
 import { ReviewMilestoneBody } from "~~/app/api/large-milestones/[milestoneId]/review/route";
 import { MilestoneStatus } from "~~/services/database/config/schema";
+import { hasActiveAdminSession, hasActiveUserSession } from "~~/utils/admin-session";
 import { EIP_712_DOMAIN, EIP_712_TYPES__REVIEW_LARGE_MILESTONE } from "~~/utils/eip712";
 import { postMutationFetcher } from "~~/utils/react-query";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
+import { SESSION_MESSAGES } from "~~/utils/session-messages";
 
 export const useLargeMilestoneReview = (milestoneId?: number) => {
   const router = useRouter();
@@ -28,17 +30,27 @@ export const useLargeMilestoneReview = (milestoneId?: number) => {
     statusNote?: string;
     completionProof?: string;
   }) => {
-    if (!milestoneId) return;
+    if (!milestoneId) return false;
     let notificationId;
     try {
       if (!connectedAddress) {
         notification.error("Please connect your wallet");
-        return;
+        return false;
       }
 
       if ((status === "verified" || status === "paid") && !txHash) {
         notification.error("Please fill tx hash");
-        return;
+        return false;
+      }
+
+      if (!(await hasActiveUserSession())) {
+        notification.error(SESSION_MESSAGES.genericExpiredRetry);
+        return false;
+      }
+
+      if (status !== "completed" && !(await hasActiveAdminSession())) {
+        notification.error(SESSION_MESSAGES.adminExpiredMilestoneApproval);
+        return false;
       }
 
       const signature = await signTypedDataAsync({
@@ -79,10 +91,16 @@ export const useLargeMilestoneReview = (milestoneId?: number) => {
       notification.remove(notificationId);
       notification.success(`Milestone ${status}`);
       router.refresh();
+      return true;
     } catch (error) {
       if (notificationId) notification.remove(notificationId);
+      if ((error as { status?: number })?.status === 401) {
+        notification.error(SESSION_MESSAGES.genericExpiredRetry);
+        return false;
+      }
       const errorMessage = getParsedError(error);
       notification.error(errorMessage);
+      return false;
     }
   };
 

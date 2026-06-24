@@ -19,7 +19,8 @@ export const LargeMilestoneRejectModal = forwardRef<HTMLDialogElement, RejectMod
   const { handleSubmit } = formMethods;
 
   const onSubmit = async (fieldValues: RejectModalFormValues) => {
-    await reviewMilestone({ status: "rejected", ...fieldValues });
+    const isReviewed = await reviewMilestone({ status: "rejected", ...fieldValues });
+    if (!isReviewed) return;
   };
 
   return (

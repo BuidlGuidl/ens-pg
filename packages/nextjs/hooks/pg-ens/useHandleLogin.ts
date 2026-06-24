@@ -9,6 +9,8 @@ export const useHandleLogin = () => {
 
   const handleLogin = useCallback(async () => {
     try {
+      if (!address) return false;
+
       const message = new SiweMessage({
         domain: window.location.host,
         address: address,
@@ -21,12 +23,16 @@ export const useHandleLogin = () => {
       const signature = await signMessageAsync({
         message: message.prepareMessage(),
       });
-      signIn("credentials", {
+      const result = await signIn("credentials", {
         message: JSON.stringify(message),
         signature,
+        redirect: false,
       });
+
+      return Boolean(result?.ok);
     } catch (error) {
       console.log(error);
+      return false;
     }
   }, [address, chain?.id, signMessageAsync]);
 

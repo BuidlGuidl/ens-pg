@@ -26,15 +26,12 @@ export const CompleteMilestoneModal = forwardRef<HTMLDialogElement, WithdrawModa
     const { handleSubmit, reset: clearFormValues } = formMethods;
 
     const onSubmit = async (fieldValues: CompleteMilestoneModalFormValues) => {
-      try {
-        const { completionProof } = fieldValues;
-        await reviewMilestone({ status: "completed", completionProof });
-        closeModal();
-        clearFormValues();
-        router.refresh();
-      } catch (error) {
-        console.error("Error completing milestone:", error);
-      }
+      const { completionProof } = fieldValues;
+      const isReviewed = await reviewMilestone({ status: "completed", completionProof });
+      if (!isReviewed) return;
+      closeModal();
+      clearFormValues();
+      router.refresh();
     };
 
     return (
